@@ -56,7 +56,7 @@ public class UserService {
 
   /**
    * This is a helper method that will check the uniqueness criteria of the
-   * username and the name
+   * username and the password
    * defined in the User entity. The method will do nothing if the input is unique
    * and throw an error otherwise.
    *
@@ -66,16 +66,17 @@ public class UserService {
    */
   private void checkIfUserExists(User userToBeCreated) {
     User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-    User userByName = userRepository.findByName(userToBeCreated.getName());
-
+    //Lea: password und name ausgetauscht
+    User userByPassword = userRepository.findByPassword(userToBeCreated.getPassword());
+    //Lea: password und name ausgetauscht
     String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
-    if (userByUsername != null && userByName != null) {
+    if (userByUsername != null && userByPassword != null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(baseErrorMessage, "username and the name", "are"));
+          String.format(baseErrorMessage, "username and the password", "are"));
     } else if (userByUsername != null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));
-    } else if (userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "name", "is"));
+    } else if (userByPassword != null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "password", "is"));
     }
   }
 }

@@ -24,9 +24,9 @@ public class User implements Serializable {
   @Id
   @GeneratedValue
   private Long id;
-
+  //Lea: password und name ausgetauscht
   @Column(nullable = false)
-  private String name;
+  private String password;
 
   @Column(nullable = false, unique = true)
   private String username;
@@ -44,13 +44,13 @@ public class User implements Serializable {
   public void setId(Long id) {
     this.id = id;
   }
-
-  public String getName() {
-    return name;
+  //Lea: password und name ausgetauscht
+  public String getPassword() {
+    return password;
   }
-
-  public void setName(String name) {
-    this.name = name;
+  //Lea: password und name ausgetauscht
+  public void setPassword(String password) {
+    this.password = password;
   }
 
   public String getUsername() {

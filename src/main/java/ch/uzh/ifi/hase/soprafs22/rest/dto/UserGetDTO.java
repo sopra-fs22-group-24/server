@@ -5,7 +5,8 @@ import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 public class UserGetDTO {
 
   private Long id;
-  private String name;
+  //Lea: password und name ausgetauscht
+  private String password;
   private String username;
   private UserStatus status;
 
@@ -16,13 +17,13 @@ public class UserGetDTO {
   public void setId(Long id) {
     this.id = id;
   }
-
-  public String getName() {
-    return name;
+  //Lea: password und name ausgetauscht
+  public String getPassword() {
+    return password;
   }
-
-  public void setName(String name) {
-    this.name = name;
+  //Lea: password und name ausgetauscht
+  public void setPassword(String password) {
+    this.password = password;
   }
 
   public String getUsername() {

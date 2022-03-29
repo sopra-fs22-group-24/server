@@ -1,17 +1,17 @@
 package ch.uzh.ifi.hase.soprafs22.rest.dto;
 
 public class UserPostDTO {
-
-  private String name;
+  //Lea: password und name ausgetauscht
+  private String password;
 
   private String username;
-
-  public String getName() {
-    return name;
+  //Lea: password und name ausgetauscht
+  public String getPassword() {
+    return password;
   }
-
-  public void setName(String name) {
-    this.name = name;
+  //Lea: password und name ausgetauscht
+  public void setPassword(String password) {
+    this.password = password;
   }
 
   public String getUsername() {
