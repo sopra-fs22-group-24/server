@@ -20,10 +20,12 @@ public class UserRepositoryIntegrationTest {
   private UserRepository userRepository;
 
   @Test
-  public void findByName_success() {
+  //Lea: password und name ausgetauscht
+  public void findByPassword_success() {
     // given
     User user = new User();
-    user.setName("Firstname Lastname");
+    //Lea: password und name ausgetauscht
+    user.setPassword("Firstname Lastname");
     user.setUsername("firstname@lastname");
     user.setStatus(UserStatus.OFFLINE);
     user.setToken("1");
@@ -32,11 +34,13 @@ public class UserRepositoryIntegrationTest {
     entityManager.flush();
 
     // when
-    User found = userRepository.findByName(user.getName());
+    //Lea: password und name ausgetauscht
+    User found = userRepository.findByPassword(user.getPassword());
 
     // then
     assertNotNull(found.getId());
-    assertEquals(found.getName(), user.getName());
+    //Lea: password und name ausgetauscht
+    assertEquals(found.getPassword(), user.getPassword());
     assertEquals(found.getUsername(), user.getUsername());
     assertEquals(found.getToken(), user.getToken());
     assertEquals(found.getStatus(), user.getStatus());
