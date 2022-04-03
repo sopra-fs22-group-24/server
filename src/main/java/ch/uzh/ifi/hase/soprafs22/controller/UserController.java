@@ -7,9 +7,11 @@ import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * User Controller
@@ -55,4 +57,20 @@ public class UserController {
     // convert internal representation of user back to API
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
   }
+
+    @GetMapping(value = "/users/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public UserGetDTO getUserByUserID(@PathVariable("id") String id) {
+        //change id from string to long
+        long idLong = Long.parseLong(id);
+        //look for user by id
+        //Optional because it is not certain that user exists. If not, return not found
+        Optional<User> user = userService.getUserById(idLong);
+        if (user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User was not found");
+        }
+        //return user
+        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user.get());
+    }
 }

@@ -19,61 +19,84 @@ import java.io.Serializable;
 @Table(name = "USER")
 public class User implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  @Id
-  @GeneratedValue
-  private Long id;
-  //Lea: password und name ausgetauscht
-  @Column(nullable = false)
-  private String password;
+    @Id
+    @GeneratedValue
+    private Long id;
+    //Lea: password und name ausgetauscht
+    @Column(nullable = false)
+    private String password;
 
-  @Column(nullable = false, unique = true)
-  private String username;
+    @Column(nullable = false, unique = true)
+    private String username;
 
-  @Column(nullable = false, unique = true)
-  private String token;
+    @Column(nullable = false, unique = true)
+    private String token;
 
-  @Column(nullable = false)
-  private UserStatus status;
+    @Column(nullable = false)
+    private UserStatus status;
 
-  public Long getId() {
-    return id;
-  }
+    @Column()
+    private int gamesPlayed;
 
-  public void setId(Long id) {
-    this.id = id;
-  }
-  //Lea: password und name ausgetauscht
-  public String getPassword() {
-    return password;
-  }
-  //Lea: password und name ausgetauscht
-  public void setPassword(String password) {
-    this.password = password;
-  }
+    @Column()
+    private int gamesWon;
 
-  public String getUsername() {
-    return username;
-  }
+    @Column()
+    private int score;
 
-  public void setUsername(String username) {
-    this.username = username;
-  }
+    public Long getId() {
+        return id;
+    }
 
-  public String getToken() {
-    return token;
-  }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-  public void setToken(String token) {
-    this.token = token;
-  }
+    //Lea: password und name ausgetauscht
+    public String getPassword() {
+        return password;
+    }
 
-  public UserStatus getStatus() {
-    return status;
-  }
+    //Lea: password und name ausgetauscht
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-  public void setStatus(UserStatus status) {
-    this.status = status;
-  }
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    public int getGamesPlayed() { return gamesPlayed; }
+
+    public void setGamesPlayed(int gamesPlayed) {this.gamesPlayed = gamesPlayed; }
+
+    public int getGamesWon() {return gamesWon;}
+
+    public void setGamesWon(int gamesWon) {this.gamesWon = gamesWon; }
+
+    public int getScore() { return score; }
+
+    public void setScore(int Points) { this.score = this.score + Points; }
 }

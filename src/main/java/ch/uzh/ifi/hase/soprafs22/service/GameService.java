@@ -33,7 +33,7 @@ public class GameService {
         game.setDiscardPile(discardPile);
         */
         //Game game = new Game();
-        game.setCard(new Card(Color.BLUE, Symbol.DISCARD_ALL));
+        //game.setCard(new Card(Color.BLUE, Symbol.DISCARD_ALL));
         gameRepository.save(game);
         gameRepository.flush();
     }
