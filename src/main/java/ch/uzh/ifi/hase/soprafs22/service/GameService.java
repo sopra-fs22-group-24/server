@@ -27,21 +27,14 @@ public class GameService {
 
         Deck deck = new Deck();
         game.setDeck(deck);
-        /*
-        DiscardPile discardPile = new DiscardPile();
 
+        DiscardPile discardPile = new DiscardPile();
         game.setDiscardPile(discardPile);
-        */
+
         //Game game = new Game();
-        game.setCard(new Card(Color.BLUE, Symbol.DISCARD_ALL));
         gameRepository.save(game);
         gameRepository.flush();
     }
 
-    /*
-    public Vector<Card> drawCards(Game game) {
 
-    }
-
-     */
 }

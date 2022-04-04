@@ -79,4 +79,14 @@ public class UserService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "password", "is"));
     }
   }
+
+  public User authenticateUser(String token) {
+      User user = userRepository.findByToken(token);
+      if(user == null || token == null) {
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+      }
+
+      return user;
+
+  }
 }
