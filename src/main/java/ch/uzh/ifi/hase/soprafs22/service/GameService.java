@@ -31,7 +31,6 @@ public class GameService {
         DiscardPile discardPile = new DiscardPile();
         game.setDiscardPile(discardPile);
 
-        //Game game = new Game();
         gameRepository.save(game);
         gameRepository.flush();
     }
