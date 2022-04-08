@@ -14,7 +14,7 @@ public class Lobby {
     @GeneratedValue
     Long lobbyId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 32768)
     Vector<User> players;
 
     //@Column(nullable = true)
@@ -55,6 +55,9 @@ public class Lobby {
     }
 
     public void addUser(User user) {
+        if(players == null) {
+            players = new Vector<User>();
+        }
         players.add(user);
     }
 

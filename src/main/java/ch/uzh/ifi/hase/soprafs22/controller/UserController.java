@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs22.controller;
 
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetTokenDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
@@ -72,5 +73,17 @@ public class UserController {
         }
         //return user
         return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user.get());
+    }
+
+    @PostMapping(value = "/login")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public UserGetTokenDTO login(@RequestBody UserPostDTO dto ) {
+        System.out.println(dto.getUsername());
+        System.out.println(dto.getPassword());
+        User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(dto);
+        User savedUser = userService.login(userInput);
+        return DTOMapper.INSTANCE.convertEntityToUserGetTokenDTO(savedUser);
+
     }
 }

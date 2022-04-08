@@ -3,11 +3,13 @@ package ch.uzh.ifi.hase.soprafs22.service;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs22.utils.StompHeaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -93,4 +95,54 @@ public class UserService {
       return user;
 
   }
+
+    public User authenticateUser(StompHeaderAccessor accessor) {
+        String token = StompHeaderUtil.getNativeHeaderField(accessor, "token");
+        return authenticateUser(token);
+
+    }
+
+    public User login(User userInput) {
+        //get saved user from provided username
+        System.out.println(userInput.getUsername());
+        System.out.println(userInput.getPassword());
+        User savedUser = userRepository.findByUsername(userInput.getUsername());//findSpecificUserByName(userInput.getUsername());
+        if(savedUser == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User doesn't exists");
+        }
+
+        if(!userInput.getPassword().equals(savedUser.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Passwords don't match");
+        }
+        //Create new token
+        savedUser = updateToken(savedUser);
+        savedUser.setStatus(UserStatus.ONLINE);
+        return savedUser;
+    }
+
+    /**
+     * Updates the token for a User
+     * @param user
+     * @return User
+     */
+    public User updateToken(User user) {
+        user.setToken(UUID.randomUUID().toString());
+        user = userRepository.save(user);
+        log.debug("updated token for User: {}",user);
+        return user;
+    }
+
+    public User getUserByToken(String token) {
+        return userRepository.findByToken(token);
+    }
+
+    public User getUserByPrincipalName(String name) {
+        return userRepository.findByPrincipalName(name);
+    }
+
+    public void addPrincipalName(User user, String name) {
+        user.setPrincipalName(name);
+        userRepository.save(user);
+        userRepository.flush();
+    }
 }

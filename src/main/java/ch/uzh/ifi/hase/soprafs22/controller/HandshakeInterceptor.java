@@ -1,39 +1,38 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
-import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
-import org.springframework.context.event.EventListener;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import ch.uzh.ifi.hase.soprafs22.entity.User;
+import ch.uzh.ifi.hase.soprafs22.service.LobbyService;
+import ch.uzh.ifi.hase.soprafs22.service.UserService;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.messaging.SessionConnectedEvent;
-import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
+
+import java.util.Map;
 
 @Component
-public class HandshakeInterceptor  {
+public class HandshakeInterceptor extends HttpSessionHandshakeInterceptor {
 
-    private UserRepository userRepository;
+    private UserService userService;
+    private LobbyService lobbyService;
 
-    public HandshakeInterceptor(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    HandshakeInterceptor(UserService userService, LobbyService lobbyService) {
+        this.userService = userService;
+        this.lobbyService = lobbyService;
     }
+    @Override
+    public boolean beforeHandshake(ServerHttpRequest request,
+                                   ServerHttpResponse response,
+                                   WebSocketHandler wsHandler,
+                                   Map<String,Object> attributes)
+            throws Exception {
+        System.out.println(request.getHeaders());
+        System.out.println(response);
+        System.out.println(wsHandler);
+        System.out.println(attributes);
+        //User user = userService.authenticateUser(token);
 
-    @EventListener
-    private void handleSessionConnect(SessionConnectedEvent event) {
-        System.out.println("halleluja");
-        SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(event.getMessage());
-
+        return true;
     }
-
-    @EventListener
-    private void handleSessionDisconnect(SessionDisconnectEvent event) {
-        System.out.println("byebye");
-        /*
-        Optional.ofNullable(userRepository.getParticipant(event.getSessionId()))
-                .ifPresent(login -> {
-                    messagingTemplate.convertAndSend(logoutDestination, new LogoutEvent(login.getUsername()));
-                    participantRepository.removeParticipant(event.getSessionId());
-                });
-
-         */
-    }
-
 }

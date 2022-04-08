@@ -46,6 +46,8 @@ public class User implements Serializable {
     @Column()
     private int score;
 
+    @Column()
+    private String principalName;
     public Long getId() {
         return id;
     }
@@ -99,4 +101,12 @@ public class User implements Serializable {
     public int getScore() { return score; }
 
     public void setScore(int Points) { this.score = this.score + Points; }
+
+    public String getPrincipalName() {
+        return principalName;
+    }
+
+    public void setPrincipalName(String principalName) {
+        this.principalName = principalName;
+    }
 }

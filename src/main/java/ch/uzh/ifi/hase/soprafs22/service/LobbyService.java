@@ -9,11 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Vector;
 
 @Service
 @Transactional
@@ -46,5 +47,18 @@ public class LobbyService {
 
     public List<Lobby> getLobbies() {
         return lobbyRepository.findAll();
+    }
+
+
+
+    public Lobby joinLobby(User user, long lobbyId) {
+        Lobby lobby = lobbyRepository.findByLobbyId(lobbyId);
+        if (lobby == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        lobby.addUser(user);
+        lobbyRepository.save(lobby);
+        lobbyRepository.flush();
+        return lobby;
     }
 }
