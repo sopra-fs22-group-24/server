@@ -14,15 +14,16 @@ import java.util.List;
 
 @Configuration
 @EnableWebSocketMessageBroker
-public class WebSocketConfig extends WebSocketMessageBrokerConfigurationSupport implements WebSocketMessageBrokerConfigurer{
+public class WebSocketConfig /*extends WebSocketMessageBrokerConfigurationSupport*/ implements WebSocketMessageBrokerConfigurer{
 
     @Autowired
     private HandshakeHandler handshakeHandler;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");
+        config.enableSimpleBroker("/topic", "/queue");
         config.setApplicationDestinationPrefixes("/app");
+        config.setUserDestinationPrefix("/users");
 
     }
 
@@ -33,6 +34,7 @@ public class WebSocketConfig extends WebSocketMessageBrokerConfigurationSupport 
                 .setAllowedOrigins("http://localhost:3000")
                 .withSockJS();
     }
+    /*
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
         super.configureWebSocketTransport(registry);
@@ -62,5 +64,7 @@ public class WebSocketConfig extends WebSocketMessageBrokerConfigurationSupport 
         messageConverters.add(new MappingJackson2MessageConverter());
         return true;
     }
+    */
+
 }
 

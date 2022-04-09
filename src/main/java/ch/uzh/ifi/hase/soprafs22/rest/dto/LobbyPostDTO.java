@@ -3,7 +3,7 @@ package ch.uzh.ifi.hase.soprafs22.rest.dto;
 public class LobbyPostDTO {
     private Long lobbyId;
 
-    public Long getLobbyIs() {
+    public Long getLobbyId() {
         return lobbyId;
     }
 

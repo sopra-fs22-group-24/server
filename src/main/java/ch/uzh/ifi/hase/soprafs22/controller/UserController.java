@@ -56,7 +56,7 @@ public class UserController {
     User createdUser = userService.createUser(userInput);
 
     // convert internal representation of user back to API
-    return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
+    return DTOMapper.INSTANCE.convertEntityToUserGetTokenDTO(createdUser);
   }
 
     @GetMapping(value = "/users/{id}")

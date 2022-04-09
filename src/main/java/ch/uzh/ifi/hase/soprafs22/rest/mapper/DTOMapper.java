@@ -57,4 +57,5 @@ public interface DTOMapper {
     @Mapping(source = "gamesPlayed", target = "gamesPlayed")
     @Mapping(source = "token", target = "token")
   UserGetTokenDTO convertEntityToUserGetTokenDTO(User user);
+
 }

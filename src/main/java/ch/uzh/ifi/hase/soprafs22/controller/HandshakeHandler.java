@@ -52,6 +52,9 @@ public class HandshakeHandler extends DefaultHandshakeHandler {
         System.out.println(accessor);
         //String token = StompHeaderUtil.getNativeHeaderField(accessor, "token");
         User user = userService.getUserByToken(token);
+        if(user==null) {
+            return;
+        }
         userService.addPrincipalName(user, principal.getName());
 
 
