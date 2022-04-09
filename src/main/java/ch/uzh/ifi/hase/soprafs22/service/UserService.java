@@ -142,6 +142,7 @@ public class UserService {
 
     public void addPrincipalName(User user, String name) {
         user.setPrincipalName(name);
+
         userRepository.save(user);
         userRepository.flush();
     }
