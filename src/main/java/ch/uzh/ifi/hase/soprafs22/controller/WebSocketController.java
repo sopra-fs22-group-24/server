@@ -89,8 +89,8 @@ public class WebSocketController {
         }
         Lobby lobby = lobbyService.createLobby(user);
         LobbyPostDTO dto = DTOMapper.INSTANCE.convertEntityToLobbyPostDTO(lobby);
-        log.info("created Lobby {} for {}",lobby.getLobbyId(),user.getUsername());
         simpMessage.convertAndSendToUser(accessor.getUser().getName(), "/queue/messages", dto );
+        log.info("created Lobby {} for {}",lobby.getLobbyId(),user.getUsername());
     }
 
 }
