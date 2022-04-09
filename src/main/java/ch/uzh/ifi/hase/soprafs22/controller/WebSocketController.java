@@ -61,20 +61,15 @@ public class WebSocketController {
     }
 
     @MessageMapping("/joinLobby")
-    public void handle(StompHeaderAccessor accessor) {
-        String sessionId = accessor.getSessionId();
-        log.info("/joinLobby with id {}", sessionId);
+    public void handle(StompHeaderAccessor accessor, LobbyPostDTO dto) {
+        User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+        log.info("/joinLobby. User {} wants to join lobby id {}", user.getUsername(),dto.getLobbyId());
 
-        System.out.println(sessionId);
-        System.out.println(accessor.getUser().getName());
-        Principal p = accessor.getUser();
-        Message m1 = new Message("principal");
-        Message m2 = new Message("sessionId");
+        Lobby lobby = lobbyService.joinLobby(user, dto.getLobbyId());
+        Message m = new Message(String.format("joined lobby %d",lobby.getLobbyId()));
+        simpMessage.convertAndSendToUser(user.getPrincipalName(), "/queue/messages", m);
+        log.info("/joinLobby. User {} joined lobby id {}", user.getUsername(),lobby.getLobbyId());
 
-        simpMessage.convertAndSendToUser(p.getName(), "/queue/messages", m1);
-        simpMessage.convertAndSendToUser(sessionId, "/queue/messages", m2);
-
-        //log.info("Replied to {} with message {}",sessionId, m);
     }
 
     @MessageMapping("/createLobby")

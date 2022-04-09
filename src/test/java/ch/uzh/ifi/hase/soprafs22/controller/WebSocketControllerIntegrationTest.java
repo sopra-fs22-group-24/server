@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs22.controller;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
+import ch.uzh.ifi.hase.soprafs22.messagingObjects.Message;
 import ch.uzh.ifi.hase.soprafs22.repository.LobbyRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.LobbyPostDTO;
@@ -91,11 +92,11 @@ class WebSocketControllerIntegrationTest {
         //used to await async calls
         BlockingQueue<String> blockingQueue = new LinkedBlockingDeque<>();
 
-        String token = "token";
+        String token = "token1";
 
         User user = new User();
-        user.setUsername("test");
-        user.setPassword("test");
+        user.setUsername("test1");
+        user.setPassword("test1");
         user.setStatus(UserStatus.ONLINE);
         user.setToken(token);
 
@@ -122,11 +123,11 @@ class WebSocketControllerIntegrationTest {
         BlockingQueue<LobbyPostDTO> blockingQueue = new LinkedBlockingDeque<>();
         //webSocketStompClient.setMessageConverter(new StringMessageConverter());
 
-        String token = "token";
+        String token = "token2";
 
         User user = new User();
-        user.setUsername("test");
-        user.setPassword("test");
+        user.setUsername("test2");
+        user.setPassword("test2");
         user.setStatus(UserStatus.ONLINE);
         user.setToken(token);
 
@@ -141,19 +142,16 @@ class WebSocketControllerIntegrationTest {
         session.subscribe("/users/queue/messages", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                System.out.println("accessed");
                 return LobbyPostDTO.class;
             }
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                System.out.println("Received message: " + payload);
                 blockingQueue.add((LobbyPostDTO) payload);
             }
         });
 
         //wait for subscription
-        System.out.println(blockingQueue.poll(1, SECONDS));
         session.send("/app/createLobby","");
         LobbyPostDTO dto = blockingQueue.poll(1, SECONDS);
         assertNotNull(dto.getLobbyId(), "lobbyId is null");
@@ -163,4 +161,83 @@ class WebSocketControllerIntegrationTest {
 
 
     }
+
+    @Test
+    public void whenCallingJoinLobbyEndpointWithValidLobbyId_thenUserIsAddedToLobbyAndReceivesMessage() throws InterruptedException {
+        //Setup
+        BlockingQueue<LobbyPostDTO> blockingQueue = new LinkedBlockingDeque<>();
+        BlockingQueue<Message> blockingQueue2 = new LinkedBlockingDeque<>();
+
+        //webSocketStompClient.setMessageConverter(new StringMessageConverter());
+
+        String token1 = "token3";
+
+        User user1 = new User();
+        user1.setUsername("test3");
+        user1.setPassword("test3");
+        user1.setStatus(UserStatus.ONLINE);
+        user1.setToken(token1);
+        userRepository.save(user1);
+
+        String token2 = "token4";
+
+        User user2 = new User();
+        user2.setUsername("test4");
+        user2.setPassword("test4");
+        user2.setStatus(UserStatus.ONLINE);
+        user2.setToken(token2);
+        userRepository.save(user2);
+        userRepository.flush();
+
+        StompSession session = connectWebsocket(token1);
+        //wait for connection
+        blockingQueue.poll(1, SECONDS);
+
+        session.subscribe("/users/queue/messages", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return LobbyPostDTO.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                blockingQueue.add((LobbyPostDTO) payload);
+            }
+        });
+
+        //wait for subscription
+        session.send("/app/createLobby","");
+        LobbyPostDTO dto = blockingQueue.poll(1, SECONDS);
+
+        //test
+        StompSession session2 = connectWebsocket(token2);
+        //wait for connection
+        blockingQueue.poll(1, SECONDS);
+
+        session2.subscribe("/users/queue/messages", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return Message.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                blockingQueue2.add((Message) payload);
+            }
+        });
+        blockingQueue.poll(1, SECONDS);
+
+        session2.send("/app/joinLobby", dto);
+        Message m = blockingQueue2.poll(1, SECONDS);
+
+        Lobby receivedLobby = lobbyRepository.findByLobbyId(dto.getLobbyId());
+        assertNotNull(receivedLobby.getLobbyId(), "lobbyId is null");
+        Vector<User> players = receivedLobby.getPlayers();
+        assertTrue(String.format("joined lobby %d",dto.getLobbyId()).equals(m.getContent()));
+        assertEquals(players.get(0).getId(), user1.getId(), "user1 is not in lobby");
+        assertEquals(players.get(1).getId(),user2.getId(), "user2 is not in lobby");
+
+
+    }
+
 }
