@@ -5,7 +5,6 @@ import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 public class UserGetDTO {
 
   private Long id;
-  //Lea: password und name ausgetauscht
   private String password;
   private String username;
   private UserStatus status;

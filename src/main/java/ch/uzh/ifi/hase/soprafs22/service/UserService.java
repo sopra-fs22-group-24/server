@@ -43,13 +43,13 @@ public class UserService {
   }
 
   public User createUser(User newUser) {
-    newUser.setToken(UUID.randomUUID().toString());
-    newUser.setStatus(UserStatus.OFFLINE);
-
-    checkIfUserExists(newUser);
-
+    if(null!=userRepository.findByUsername(newUser.getUsername())){
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Username is already taken");
+    }
     // saves the given entity but data is only persisted in the database once
     // flush() is called
+    newUser.setToken(UUID.randomUUID().toString());
+    newUser.setStatus(UserStatus.ONLINE);
     newUser = userRepository.save(newUser);
     userRepository.flush();
 
@@ -60,31 +60,7 @@ public class UserService {
   public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
-  /**
-   * This is a helper method that will check the uniqueness criteria of the
-   * username and the password
-   * defined in the User entity. The method will do nothing if the input is unique
-   * and throw an error otherwise.
-   *
-   * @param userToBeCreated
-   * @throws org.springframework.web.server.ResponseStatusException
-   * @see User
-   */
-  private void checkIfUserExists(User userToBeCreated) {
-    User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-    //Lea: password und name ausgetauscht
-    User userByPassword = userRepository.findByPassword(userToBeCreated.getPassword());
-    //Lea: password und name ausgetauscht
-    String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
-    if (userByUsername != null && userByPassword != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(baseErrorMessage, "username and the password", "are"));
-    } else if (userByUsername != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));
-    } else if (userByPassword != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "password", "is"));
-    }
-  }
+
 
   public User authenticateUser(String token) {
       User user = userRepository.findByToken(token);
@@ -104,15 +80,14 @@ public class UserService {
 
     public User login(User userInput) {
         //get saved user from provided username
-        System.out.println(userInput.getUsername());
-        System.out.println(userInput.getPassword());
         User savedUser = userRepository.findByUsername(userInput.getUsername());//findSpecificUserByName(userInput.getUsername());
+        //check if useranme exists
         if(savedUser == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User doesn't exists");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid Login Credentials");
         }
-
+        //check password
         if(!userInput.getPassword().equals(savedUser.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Passwords don't match");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid Login Credentials");
         }
         //Create new token
         savedUser = updateToken(savedUser);
@@ -153,6 +128,8 @@ public class UserService {
         //update status
         User userToBeLoggedOut = userRepository.findByToken(userInput.getToken());
         userToBeLoggedOut.setStatus(UserStatus.OFFLINE);
+        userRepository.save(userToBeLoggedOut);
+        userRepository.flush();
         //retrun updated User
         return userToBeLoggedOut;
     }

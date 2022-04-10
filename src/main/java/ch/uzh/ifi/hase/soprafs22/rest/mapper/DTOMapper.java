@@ -48,13 +48,14 @@ public interface DTOMapper {
   LobbyGetDTO convertEntityToLobbyGetDTO(Lobby lobby);
 
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "password", target = "password")
     @Mapping(source = "username", target = "username")
+    @Mapping(source = "token", target = "token")
+    //returns to much information for login maybe we dont even need id & username aswell
+    /*@Mapping(source = "password", target = "password")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "score", target = "score")
     @Mapping(source = "gamesWon", target = "gamesWon")
-    @Mapping(source = "gamesPlayed", target = "gamesPlayed")
-    @Mapping(source = "token", target = "token")
+    @Mapping(source = "gamesPlayed", target = "gamesPlayed")*/
   UserGetTokenDTO convertEntityToUserGetTokenDTO(User user);
 
   @Mapping(source = "token", target = "token")
