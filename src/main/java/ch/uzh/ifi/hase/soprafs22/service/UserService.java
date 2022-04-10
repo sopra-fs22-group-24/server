@@ -146,4 +146,14 @@ public class UserService {
         userRepository.save(user);
         userRepository.flush();
     }
+
+    public User logout(User userInput) {
+        //authorize
+        authenticateUser(userInput.getToken());
+        //update status
+        User userToBeLoggedOut = userRepository.findByToken(userInput.getToken());
+        userToBeLoggedOut.setStatus(UserStatus.OFFLINE);
+        //retrun updated User
+        return userToBeLoggedOut;
+    }
 }

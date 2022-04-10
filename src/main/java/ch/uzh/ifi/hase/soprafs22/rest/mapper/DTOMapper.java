@@ -22,13 +22,12 @@ import org.mapstruct.factory.Mappers;
 public interface DTOMapper {
 
   DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
-  //Lea: password und name ausgetauscht
+
   @Mapping(source = "password", target = "password")
   @Mapping(source = "username", target = "username")
   User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
   @Mapping(source = "id", target = "id")
-  //Lea: password und name ausgetauscht
   @Mapping(source = "password", target = "password")
   @Mapping(source = "username", target = "username")
   @Mapping(source = "status", target = "status")
@@ -57,5 +56,10 @@ public interface DTOMapper {
     @Mapping(source = "gamesPlayed", target = "gamesPlayed")
     @Mapping(source = "token", target = "token")
   UserGetTokenDTO convertEntityToUserGetTokenDTO(User user);
+
+  @Mapping(source = "token", target = "token")
+  User convertUserPostTokenDTOtoEntity(UserPostTokenDTO userPostTokenDTO);
+
+
 
 }
