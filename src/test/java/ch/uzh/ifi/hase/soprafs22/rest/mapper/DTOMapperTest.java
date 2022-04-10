@@ -46,8 +46,6 @@ public class DTOMapperTest {
 
     // check content
     assertEquals(user.getId(), userGetDTO.getId());
-    //Lea: password und name ausgetauscht
-    assertEquals(user.getPassword(), userGetDTO.getPassword());
     assertEquals(user.getUsername(), userGetDTO.getUsername());
     assertEquals(user.getStatus(), userGetDTO.getStatus());
   }

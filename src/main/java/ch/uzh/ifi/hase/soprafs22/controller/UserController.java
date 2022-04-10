@@ -68,16 +68,13 @@ public class UserController {
         long idLong = Long.parseLong(id);
         //look for user by id
         //Optional because it is not certain that user exists. If not, return not found
-        Optional<User> user = userService.getUserById(idLong);
-        if (user.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User was not found");
-        }
+        User user = userService.getUserById(idLong);
+
         //return user
-        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user.get());
+        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
     }
 
     @PostMapping(value = "/login")
-    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public UserGetTokenDTO login(@RequestBody UserPostDTO dto ) {
 
@@ -88,7 +85,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/logout")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
     public void logout(@RequestBody UserPostTokenDTO dto ) {
         User userInput = DTOMapper.INSTANCE.convertUserPostTokenDTOtoEntity(dto);
