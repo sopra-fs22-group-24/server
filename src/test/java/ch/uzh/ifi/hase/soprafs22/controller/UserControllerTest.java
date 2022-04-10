@@ -184,7 +184,7 @@ public class UserControllerTest {
         UserPostTokenDTO userPostTokenDTO = new UserPostTokenDTO();
         userPostTokenDTO.setToken("1");
 
-        //given login credntials are incorrect
+        //given logout credntials are incorrect
         given(userService.logout(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
         // when/then -> do the request + validate the result
@@ -206,7 +206,7 @@ public class UserControllerTest {
         UserPostTokenDTO userPostTokenDTO = new UserPostTokenDTO();
         userPostTokenDTO.setToken("1");
 
-        //given login credntials are incorrect
+        //given logout credntials are correct
         given(userService.logout(Mockito.any())).willReturn(user);
 
         // when/then -> do the request + validate the result
@@ -233,7 +233,7 @@ public class UserControllerTest {
         UserPostTokenDTO userPostTokenDTO = new UserPostTokenDTO();
         userPostTokenDTO.setToken("1");
 
-        //given login credntials are incorrect
+        //given valid token
         given(userService.getUserById(Mockito.any())).willReturn(user);
 
         // when/then -> do the request + validate the result
@@ -249,6 +249,26 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.gamesPlayed", is(user.getGamesPlayed())))
                 .andExpect(jsonPath("$.gamesWon", is(user.getGamesWon())))
                 .andExpect(jsonPath("$.score", is(user.getScore())));
+
+    }
+
+    @Test
+    public void getUserById_InvlidInput() throws Exception {
+        // given
+
+        UserPostTokenDTO userPostTokenDTO = new UserPostTokenDTO();
+        userPostTokenDTO.setToken("1");
+
+        //given invalid Input
+        given(userService.getUserById(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // when/then -> do the request + validate the result
+        MockHttpServletRequestBuilder getRequest = get("/users/1")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isNotFound());
 
     }
 
