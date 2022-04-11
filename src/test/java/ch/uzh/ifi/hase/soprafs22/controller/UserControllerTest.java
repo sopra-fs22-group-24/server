@@ -5,10 +5,12 @@ import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetTokenDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostTokenDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,8 +27,8 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -253,7 +255,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void getUserById_InvlidInput() throws Exception {
+    public void getUserById_InvalidInput() throws Exception {
         // given
 
         UserPostTokenDTO userPostTokenDTO = new UserPostTokenDTO();
@@ -272,6 +274,35 @@ public class UserControllerTest {
 
     }
 
+    @Test
+    public void PutUser_ValidInput() throws Exception {
+        // given
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("testname");
+        user.setPassword("testpassword");
+        user.setToken("1");
+
+        UserPutDTO userPutDTO = new UserPutDTO();
+        userPutDTO.setUsername("test");
+        userPutDTO.setPassword("test");
+        userPutDTO.setToken("1");
+
+
+        //given valid token
+        doNothing().when(userService).updateUser(Mockito.anyLong(),Mockito.any());
+
+
+
+        // when/then -> do the request + validate the result
+        MockHttpServletRequestBuilder putRequest = put("/users/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(userPutDTO));
+
+        // then
+        mockMvc.perform(putRequest)
+                .andExpect(status().isNoContent());
+    }
 
 
     /**

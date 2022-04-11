@@ -37,11 +37,12 @@ public class UserService {
   public UserService(@Qualifier("userRepository") UserRepository userRepository) {
     this.userRepository = userRepository;
   }
-
+//get all users
   public List<User> getUsers() {
     return this.userRepository.findAll();
   }
 
+  //create a new user
   public User createUser(User newUser) {
     if(null!=userRepository.findByUsername(newUser.getUsername())){
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Username is already taken");
@@ -57,31 +58,7 @@ public class UserService {
     return newUser;
   }
 
-  public User getUserById(Long id) {
-      Optional<User> userById = userRepository.findById(id);
-      if (userById.isEmpty()) {
-          throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User was not found");
-      }
-        return userById.get();
-    }
-
-
-  public User authenticateUser(String token) {
-      User user = userRepository.findByToken(token);
-      if(user == null || token == null) {
-          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-      }
-
-      return user;
-
-  }
-
-    public User authenticateUser(StompHeaderAccessor accessor) {
-        String token = StompHeaderUtil.getNativeHeaderField(accessor, "token");
-        return authenticateUser(token);
-
-    }
-
+    //check login and login / else error
     public User login(User userInput) {
         //get saved user from provided username
         User savedUser = userRepository.findByUsername(userInput.getUsername());//findSpecificUserByName(userInput.getUsername());
@@ -99,17 +76,81 @@ public class UserService {
         return savedUser;
     }
 
+    // logout a user else throw err
+    public User logout(User userInput) {
+        //authorize
+        authenticateUser(userInput.getToken());
+        //update status
+        User userToBeLoggedOut = userRepository.findByToken(userInput.getToken());
+        userToBeLoggedOut.setStatus(UserStatus.OFFLINE);
+        userRepository.save(userToBeLoggedOut);
+        userRepository.flush();
+        //retrun updated User
+        return userToBeLoggedOut;
+    }
+
+    //updates user data username/password (more can be added)
+    public void updateUser(long id, User userinput) {
+        //CHECK if authorized
+        authenticateUser(userinput.getToken());
+        //get user by id and check if id valid
+        User userToBeUpdated = getUserById(id);
+        if(null != userRepository.findByUsername(userinput.getUsername())){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username is already taken");
+        }
+        else {
+            userToBeUpdated.setUsername(userinput.getUsername());
+        }
+        if(userinput.getPassword()!= null){
+            userToBeUpdated.setPassword(userinput.getPassword());
+        }
+        userRepository.save(userToBeUpdated);
+        userRepository.flush();
+
+    }
+
+  //get a user by id throws err if not found
+  public User getUserById(Long id) {
+      Optional<User> userById = userRepository.findById(id);
+      if (userById.isEmpty()) {
+          throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User was not found");
+      }
+        return userById.get();
+    }
+
+// check token else error
+  public User authenticateUser(String token) {
+      User user = userRepository.findByToken(token);
+      if(user == null || token == null) {
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+      }
+
+      return user;
+
+  }
+
     /**
      * Updates the token for a User
      * @param user
      * @return User
      */
+    //refresh token for user
     public User updateToken(User user) {
         user.setToken(UUID.randomUUID().toString());
         user = userRepository.save(user);
         log.debug("updated token for User: {}",user);
         return user;
     }
+/*
+    public User authenticateUser(StompHeaderAccessor accessor) {
+        String token = StompHeaderUtil.getNativeHeaderField(accessor, "token");
+        return authenticateUser(token);
+
+    }*/
+
+
+
+
 
     public User getUserByToken(String token) {
         return userRepository.findByToken(token);
@@ -126,15 +167,4 @@ public class UserService {
         userRepository.flush();
     }
 
-    public User logout(User userInput) {
-        //authorize
-        authenticateUser(userInput.getToken());
-        //update status
-        User userToBeLoggedOut = userRepository.findByToken(userInput.getToken());
-        userToBeLoggedOut.setStatus(UserStatus.OFFLINE);
-        userRepository.save(userToBeLoggedOut);
-        userRepository.flush();
-        //retrun updated User
-        return userToBeLoggedOut;
-    }
 }
