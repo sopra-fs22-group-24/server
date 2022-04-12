@@ -90,7 +90,8 @@ public class LobbyController {
         UserGetDTO userDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
 
         //Inform lobby
-        messageService.sendToLobby(lobby.getLobbyId(),user);
+
+        messageService.sendToLobby(lobby.getLobbyId(),userDTO);
         //simpMessage.convertAndSendToUser(user.getPrincipalName(), "/queue/messages", returnDto);
         log.info("/joinLobby. User {} joined lobby id {}", user.getUsername(),lobby.getLobbyId());
 
@@ -108,7 +109,7 @@ public class LobbyController {
 
         }
         */
-         
+
         Lobby lobby = lobbyService.createLobby(user);
         LobbyPostDTO dto = DTOMapper.INSTANCE.convertEntityToLobbyPostDTO(lobby);
         messageService.sendToUser(user.getPrincipalName(), dto);

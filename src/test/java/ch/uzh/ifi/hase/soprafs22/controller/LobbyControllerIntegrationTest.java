@@ -7,6 +7,7 @@ import ch.uzh.ifi.hase.soprafs22.messagingObjects.Message;
 import ch.uzh.ifi.hase.soprafs22.repository.LobbyRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.LobbyPostDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -167,6 +168,8 @@ class LobbyControllerIntegrationTest {
         //Setup
         BlockingQueue<LobbyPostDTO> blockingQueue = new LinkedBlockingDeque<>();
         BlockingQueue<LobbyPostDTO> blockingQueue2 = new LinkedBlockingDeque<>();
+        BlockingQueue<UserGetDTO> blockingQueue3 = new LinkedBlockingDeque<>();
+        BlockingQueue<UserGetDTO> blockingQueue4 = new LinkedBlockingDeque<>();
 
         //webSocketStompClient.setMessageConverter(new StringMessageConverter());
 
@@ -205,9 +208,22 @@ class LobbyControllerIntegrationTest {
             }
         });
 
+
         //wait for subscription
         session.send("/app/createLobby","");
         LobbyPostDTO dto = blockingQueue.poll(1, SECONDS);
+        session.subscribe("/lobby/" + dto.getLobbyId() + "/messages", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return UserGetDTO.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                blockingQueue4.add((UserGetDTO) payload);
+
+            }
+        });
 
         //test
         StompSession session2 = connectWebsocket(token2);
@@ -225,17 +241,33 @@ class LobbyControllerIntegrationTest {
                 blockingQueue2.add((LobbyPostDTO) payload);
             }
         });
+
+        session2.subscribe("/lobby/" + dto.getLobbyId() + "/messages", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return UserGetDTO.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                blockingQueue3.add((UserGetDTO) payload);
+
+            }
+        });
         blockingQueue.poll(1, SECONDS);
 
         session2.send("/app/joinLobby", dto);
         LobbyPostDTO dto2 = blockingQueue2.poll(1, SECONDS);
-
+        UserGetDTO userDto = blockingQueue3.poll(1,SECONDS);
+        UserGetDTO userDto2 = blockingQueue4.poll(1, SECONDS);
         Lobby receivedLobby = lobbyRepository.findByLobbyId(dto.getLobbyId());
         assertNotNull(receivedLobby.getLobbyId(), "lobbyId is null");
         Vector<User> players = receivedLobby.getPlayers();
         assertEquals(dto.getLobbyId(), dto2.getLobbyId(), "different lobby ids received");
         assertEquals(players.get(0).getId(), user1.getId(), "user1 is not in lobby");
         assertEquals(players.get(1).getId(),user2.getId(), "user2 is not in lobby");
+        assertEquals(players.get(1).getId(), userDto.getId(), "dto id not the same as player dto");
+        assertEquals(userDto.getUsername(), userDto2.getUsername(), "players got different messages");
 
 
     }
