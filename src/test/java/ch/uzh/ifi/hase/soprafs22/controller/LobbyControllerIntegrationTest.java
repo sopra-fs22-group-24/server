@@ -166,7 +166,7 @@ class LobbyControllerIntegrationTest {
     public void whenCallingJoinLobbyEndpointWithValidLobbyId_thenUserIsAddedToLobbyAndReceivesMessage() throws InterruptedException {
         //Setup
         BlockingQueue<LobbyPostDTO> blockingQueue = new LinkedBlockingDeque<>();
-        BlockingQueue<Message> blockingQueue2 = new LinkedBlockingDeque<>();
+        BlockingQueue<LobbyPostDTO> blockingQueue2 = new LinkedBlockingDeque<>();
 
         //webSocketStompClient.setMessageConverter(new StringMessageConverter());
 
@@ -217,23 +217,23 @@ class LobbyControllerIntegrationTest {
         session2.subscribe("/users/queue/messages", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return Message.class;
+                return LobbyPostDTO.class;
             }
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                blockingQueue2.add((Message) payload);
+                blockingQueue2.add((LobbyPostDTO) payload);
             }
         });
         blockingQueue.poll(1, SECONDS);
 
         session2.send("/app/joinLobby", dto);
-        Message m = blockingQueue2.poll(1, SECONDS);
+        LobbyPostDTO dto2 = blockingQueue2.poll(1, SECONDS);
 
         Lobby receivedLobby = lobbyRepository.findByLobbyId(dto.getLobbyId());
         assertNotNull(receivedLobby.getLobbyId(), "lobbyId is null");
         Vector<User> players = receivedLobby.getPlayers();
-        assertTrue(String.format("joined lobby %d",dto.getLobbyId()).equals(m.getContent()));
+        assertEquals(dto.getLobbyId(), dto2.getLobbyId(), "different lobby ids received");
         assertEquals(players.get(0).getId(), user1.getId(), "user1 is not in lobby");
         assertEquals(players.get(1).getId(),user2.getId(), "user2 is not in lobby");
 

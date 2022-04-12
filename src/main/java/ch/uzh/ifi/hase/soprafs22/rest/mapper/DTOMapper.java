@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.rest.mapper;
 
+import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.Card;
@@ -65,6 +66,6 @@ public interface DTOMapper {
     @Mapping(source = "token", target = "token")
     User convertUserPutDTOToEntity(UserPutDTO userPutDTO);
 
-
-
+    @Mapping(source = "gameId", target = "gameId")
+    GameIdDTO convertGameToGameIdDTO(Game game);
 }

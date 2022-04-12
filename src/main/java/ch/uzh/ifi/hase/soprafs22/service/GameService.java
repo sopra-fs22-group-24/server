@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
+import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.*;
 import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
@@ -21,7 +22,20 @@ public class GameService {
     public GameService(@Qualifier("gameRepository") GameRepository gameRepository) {
         this.gameRepository = gameRepository;
     }
-    public void createGame() {
+
+
+    public Game createGame(long lobbyId, User user) {
+
+        // get lobby
+
+        // check if user is creator/admin of lobby
+
+        // transform all users of lobby to players
+
+        // initialise game
+
+        // return game
+        /*
         Game game = new Game();
 
 
@@ -33,6 +47,9 @@ public class GameService {
 
         gameRepository.save(game);
         gameRepository.flush();
+
+         */
+        return null;
     }
 
 

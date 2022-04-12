@@ -16,6 +16,7 @@ import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.GameService;
 import ch.uzh.ifi.hase.soprafs22.service.LobbyService;
+import ch.uzh.ifi.hase.soprafs22.service.MessageService;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,13 +41,14 @@ public class LobbyController {
     private final Logger log = LoggerFactory.getLogger(UserService.class);
     private final LobbyService lobbyService;
     private final UserService userService;
-    @Autowired
-    private SimpMessagingTemplate simpMessage;
+    private final MessageService messageService;
 
-    LobbyController(LobbyService lobbyService, UserService userService)
+
+    LobbyController(LobbyService lobbyService, UserService userService, MessageService messageService)
     {
         this.lobbyService = lobbyService;
         this.userService = userService;
+        this.messageService = messageService;
     }
 
 
@@ -81,8 +83,15 @@ public class LobbyController {
         log.info("/joinLobby. User {} wants to join lobby id {}", user.getUsername(),dto.getLobbyId());
 
         Lobby lobby = lobbyService.joinLobby(user, dto.getLobbyId());
-        Message m = new Message(String.format("joined lobby %d",lobby.getLobbyId()));
-        simpMessage.convertAndSendToUser(user.getPrincipalName(), "/queue/messages", m);
+        LobbyPostDTO returnDto = DTOMapper.INSTANCE.convertEntityToLobbyPostDTO(lobby);
+
+        //Inform user
+        messageService.sendToUser(user.getPrincipalName(),returnDto);
+        UserGetDTO userDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+
+        //Inform lobby
+        messageService.sendToLobby(lobby.getLobbyId(),user);
+        //simpMessage.convertAndSendToUser(user.getPrincipalName(), "/queue/messages", returnDto);
         log.info("/joinLobby. User {} joined lobby id {}", user.getUsername(),lobby.getLobbyId());
 
     }
@@ -92,14 +101,18 @@ public class LobbyController {
 
         // authorize User
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+        /*
         if(user == null) {
             Message m = new Message("Error: User doesn't exist");
             simpMessage.convertAndSendToUser(accessor.getUser().getName(), "/queue/messages", m);
 
         }
+        */
+         
         Lobby lobby = lobbyService.createLobby(user);
         LobbyPostDTO dto = DTOMapper.INSTANCE.convertEntityToLobbyPostDTO(lobby);
-        simpMessage.convertAndSendToUser(accessor.getUser().getName(), "/queue/messages", dto );
+        messageService.sendToUser(user.getPrincipalName(), dto);
+        //simpMessage.convertAndSendToUser(accessor.getUser().getName(), "/queue/messages", dto );
         log.info("created Lobby {} for {}",lobby.getLobbyId(),user.getUsername());
     }
 
