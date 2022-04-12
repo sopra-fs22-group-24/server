@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class WebSocketControllerIntegrationTest {
+class LobbyControllerIntegrationTest {
     @LocalServerPort
     private Integer port;
 

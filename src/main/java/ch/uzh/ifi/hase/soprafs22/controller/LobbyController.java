@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -37,9 +38,10 @@ import java.util.Vector;
 @Controller
 public class LobbyController {
     private final Logger log = LoggerFactory.getLogger(UserService.class);
-
     private final LobbyService lobbyService;
     private final UserService userService;
+    @Autowired
+    private SimpMessagingTemplate simpMessage;
 
     LobbyController(LobbyService lobbyService, UserService userService)
     {
@@ -73,7 +75,33 @@ public class LobbyController {
 
     }
 
+    @MessageMapping("/joinLobby")
+    public void handle(StompHeaderAccessor accessor, LobbyPostDTO dto) {
+        User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+        log.info("/joinLobby. User {} wants to join lobby id {}", user.getUsername(),dto.getLobbyId());
 
+        Lobby lobby = lobbyService.joinLobby(user, dto.getLobbyId());
+        Message m = new Message(String.format("joined lobby %d",lobby.getLobbyId()));
+        simpMessage.convertAndSendToUser(user.getPrincipalName(), "/queue/messages", m);
+        log.info("/joinLobby. User {} joined lobby id {}", user.getUsername(),lobby.getLobbyId());
+
+    }
+
+    @MessageMapping("/createLobby")
+    public void createLobby(StompHeaderAccessor accessor) {
+
+        // authorize User
+        User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+        if(user == null) {
+            Message m = new Message("Error: User doesn't exist");
+            simpMessage.convertAndSendToUser(accessor.getUser().getName(), "/queue/messages", m);
+
+        }
+        Lobby lobby = lobbyService.createLobby(user);
+        LobbyPostDTO dto = DTOMapper.INSTANCE.convertEntityToLobbyPostDTO(lobby);
+        simpMessage.convertAndSendToUser(accessor.getUser().getName(), "/queue/messages", dto );
+        log.info("created Lobby {} for {}",lobby.getLobbyId(),user.getUsername());
+    }
 
 
 
