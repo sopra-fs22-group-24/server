@@ -8,7 +8,9 @@ public class DiscardPile implements Serializable {
 
     Vector<Card> discardPile;
 
-    public DiscardPile() {}
+    public DiscardPile() {
+        discardPile = new Vector<>();
+    }
 
     public void discardCard(Card card) {
         discardPile.add(card);

@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.Card;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.Color;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.Symbol;
+import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.GameException;
 import ch.uzh.ifi.hase.soprafs22.messagingObjects.Message;
 import ch.uzh.ifi.hase.soprafs22.messagingObjects.Response;
 import ch.uzh.ifi.hase.soprafs22.messagingObjects.Hello;
@@ -70,7 +71,15 @@ public class GameController {
 
     }
 
-
+    @MessageMapping("/game/{gameId}/playCard")
+    public void playCard(StompHeaderAccessor accessor, Card card,@PathVariable("gameId") long gameId) {
+        User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+        try {
+            gameService.playCard(gameId, user, card);
+        } catch (GameException e) {
+            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+        }
+    }
 
 
 

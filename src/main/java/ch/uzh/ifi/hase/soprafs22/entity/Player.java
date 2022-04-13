@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
+import ch.uzh.ifi.hase.soprafs22.entity.deck.Hand;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -13,5 +15,21 @@ public class Player implements Serializable {
     @OneToOne
     User user;
 
+    @Column()
+    Hand hand;
+    public User getUser() {
+        return user;
+    }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Hand getHand() {
+        return hand;
+    }
+
+    public void setHand(Hand hand) {
+        this.hand = hand;
+    }
 }
