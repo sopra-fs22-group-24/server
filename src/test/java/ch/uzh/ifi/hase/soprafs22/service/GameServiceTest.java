@@ -1,21 +1,23 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.entity.Game;
+import ch.uzh.ifi.hase.soprafs22.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs22.entity.Player;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.*;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.*;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
+import ch.uzh.ifi.hase.soprafs22.repository.LobbyRepository;
 import ch.uzh.ifi.hase.soprafs22.service.GameService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.persistence.Lob;
 import java.util.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,8 +26,12 @@ public class GameServiceTest {
     @Mock
     GameRepository gameRepository;
 
+
     @Mock
     MessageService messageService;
+
+    @Mock
+    LobbyService lobbyService;
 
     @InjectMocks
     private GameService gameService;
@@ -187,5 +193,55 @@ public class GameServiceTest {
         assertEquals(topMostCard.getSymbol(), card.getSymbol(), "Symbol not the same");
 
         assertTrue(game.checkPlayerTurn(player2), "Turn order not increased");
+    }
+
+    @Test
+    public void startGame_whenPlayerNotAdmin_thenThrowException() {
+        //Atm the user with index 0 in the lobby is the admin
+
+        User u1 = new User();
+        User u2 = new User();
+
+        u1.setId(1l);
+        u2.setId(2l);
+
+        long lobbyId = 1;
+        Lobby lobby = new Lobby();
+        lobby.setLobbyId(lobbyId);
+        lobby.addUser(u1);
+        lobby.addUser(u2);
+
+
+        Mockito.when(lobbyService.findByLobbyId(lobbyId)).thenReturn(lobby);
+
+        assertThrows(UserNotLobbyAdminException.class,() -> gameService.createGame(lobbyId,u2));
+
+    }
+
+    @Test
+    public void startGame_whenSuccessful_thenEachPlayerInGameAndHasHand() {
+        //Atm the user with index 0 in the lobby is the admin
+
+        User u1 = new User();
+        User u2 = new User();
+
+        u1.setId(1l);
+        u2.setId(2l);
+
+        long lobbyId = 1;
+        Lobby lobby = new Lobby();
+        lobby.setLobbyId(lobbyId);
+        lobby.addUser(u1);
+        lobby.addUser(u2);
+
+
+        Mockito.when(lobbyService.findByLobbyId(lobbyId)).thenReturn(lobby);
+        Mockito.when(gameRepository.save(Mockito.any())).then(AdditionalAnswers.returnsFirstArg());
+        Game game = gameService.createGame(lobbyId,u1);
+        assertEquals(u1.getId(),game.getPlayers().get(0).getUser().getId());
+        assertEquals(u2.getId(),game.getPlayers().get(1).getUser().getId());
+        assertEquals(7, game.getPlayers().get(0).getHand().getCardCount());
+        assertEquals(7, game.getPlayers().get(1).getHand().getCardCount());
+
     }
 }

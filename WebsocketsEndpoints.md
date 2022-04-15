@@ -22,6 +22,10 @@ Starts a game. Must be called by lobbyOwner. Takes a lobbyId.
 ```socket.send("/app/game",{"lobbyId":lobbyId})```
 Sends gameId to `/lobby/{lobbyId}/messages`
 
+### /app/game({gameId}/playCard)
+Plays a card. Must contain a card.
+
+
 ## Subscription endpoints
 Subscription endpoints enable the communication between server and client.  
 On subscription one has to provide an endpoint destination as well as a callback function to handle incomming messages.  

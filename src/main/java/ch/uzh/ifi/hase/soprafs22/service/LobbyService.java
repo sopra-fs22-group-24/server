@@ -61,4 +61,10 @@ public class LobbyService {
         lobbyRepository.flush();
         return lobby;
     }
+
+
+
+    public Lobby findByLobbyId(long lobbyId) {
+        return lobbyRepository.findByLobbyId(lobbyId);
+    }
 }

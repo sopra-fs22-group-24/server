@@ -22,4 +22,8 @@ public class Hand implements Serializable {
     public void removeCard(Card card) {
         hand.remove(card);
     }
+
+    public int getCardCount() {
+        return hand.size();
+    }
 }

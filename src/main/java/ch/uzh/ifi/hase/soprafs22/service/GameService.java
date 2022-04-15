@@ -1,9 +1,11 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
+import ch.uzh.ifi.hase.soprafs22.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs22.entity.Player;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.*;
 import ch.uzh.ifi.hase.soprafs22.entity.Game;
+import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.UserNotLobbyAdminException;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.*;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.CardDTO;
@@ -11,9 +13,10 @@ import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Vector;
 
 @Service
 @Transactional
@@ -22,40 +25,55 @@ public class GameService {
 
     private final GameRepository gameRepository;
     private final MessageService messageService;
+    private final LobbyService lobbyService;
 
     @Autowired
-    public GameService(@Qualifier("gameRepository") GameRepository gameRepository, MessageService messageService) {
+    public GameService(GameRepository gameRepository, MessageService messageService, LobbyService lobbyService) {
         this.gameRepository = gameRepository;
         this.messageService = messageService;
+        this.lobbyService = lobbyService;
     }
+
+
+
 
 
     public Game createGame(long lobbyId, User user) {
 
         // get lobby
+        Lobby lobby = lobbyService.findByLobbyId(lobbyId);
 
         // check if user is creator/admin of lobby
-
-        // transform all users of lobby to players
-
-        // initialise game
-
-        // return game
-        /*
+        if(!lobby.userIsAdmin(user)) {
+            throw new UserNotLobbyAdminException();
+        }
         Game game = new Game();
-
-
+        Vector<Player> players = new Vector<>();
+        // transform all users of lobby to players
         Deck deck = new Deck();
-        game.setDeck(deck);
-
+        for(User u: lobby.getPlayers()) {
+            Player player = new Player();
+            player.setUser(u);
+            Hand hand = new Hand();
+            for(int i=0; i<7; i++) {
+                hand.addCard(deck.drawCard());
+            }
+            player.setHand(hand);
+            players.add(player);
+        }
+        //TODO Check how many players there are and throw accordingly
         DiscardPile discardPile = new DiscardPile();
+        discardPile.discardCard(deck.drawCard());
+
+        game.setPlayers(players);
+        game.setDeck(deck);
         game.setDiscardPile(discardPile);
 
-        gameRepository.save(game);
+        Game savedGame = gameRepository.save(game);
         gameRepository.flush();
+        return savedGame;
 
-         */
-        return null;
+
     }
 
     public void playCard(long gameId, User user, Card card) {

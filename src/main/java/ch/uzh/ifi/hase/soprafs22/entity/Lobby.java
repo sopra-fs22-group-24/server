@@ -21,6 +21,10 @@ public class Lobby {
     @OneToOne
     Game game;
 
+    public Lobby() {
+        players = new Vector<>();
+    }
+
     public Long getLobbyId() {
         return lobbyId;
     }
@@ -63,5 +67,10 @@ public class Lobby {
 
     public void removeUser(User user) {
         players.remove(user);
+    }
+
+    public boolean userIsAdmin(User user) {
+        User admin = players.get(0);
+        return user.getId() == admin.getId();
     }
 }

@@ -61,13 +61,18 @@ public class GameController {
     @MessageMapping("/game")
     public void startGame(StompHeaderAccessor accessor, LobbyPostDTO dto) {
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+
         long lobbyId = dto.getLobbyId();
-        //TODO create game
 
-        Game game = gameService.createGame(lobbyId, user);
-        GameIdDTO gameDto = DTOMapper.INSTANCE.convertGameToGameIdDTO(game);
+        try {
+            Game game = gameService.createGame(lobbyId, user);
+            GameIdDTO gameDto = DTOMapper.INSTANCE.convertGameToGameIdDTO(game);
+            messageService.sendToLobby(lobbyId,gameDto);
+            simpMessage.convertAndSend(String.format("/lobby/%d/messages", lobbyId), gameDto);
+        } catch (GameException e) {
+            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+        }
 
-        simpMessage.convertAndSend(String.format("/lobby/%d/messages", lobbyId), gameDto);
 
     }
 
