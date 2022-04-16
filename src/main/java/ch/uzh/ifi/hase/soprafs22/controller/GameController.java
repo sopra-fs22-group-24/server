@@ -61,17 +61,19 @@ public class GameController {
     @MessageMapping("/game")
     public void startGame(StompHeaderAccessor accessor, LobbyPostDTO dto) {
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
-
+        log.info("User {} in lobby {} wants to start game", user.getUsername(), dto.getLobbyId());
         long lobbyId = dto.getLobbyId();
-
         try {
             Game game = gameService.createGame(lobbyId, user);
             GameIdDTO gameDto = DTOMapper.INSTANCE.convertGameToGameIdDTO(game);
             messageService.sendToLobby(lobbyId,gameDto);
-            simpMessage.convertAndSend(String.format("/lobby/%d/messages", lobbyId), gameDto);
+            log.info("Successfully created game {} for lobby {} by user {}", game.getGameId(), lobbyId, user.getUsername());
+            //simpMessage.convertAndSend(String.format("/lobby/%d/messages", lobbyId), gameDto);
         } catch (GameException e) {
+            log.info("Error in /game: {} ",e.getClass().getSimpleName());
             messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
         }
+
 
 
     }

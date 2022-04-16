@@ -71,6 +71,8 @@ public class Lobby {
 
     public boolean userIsAdmin(User user) {
         User admin = players.get(0);
-        return user.getId() == admin.getId();
+        long id1 = user.getId();
+        long id2 = admin.getId();
+        return id1==id2;
     }
 }
