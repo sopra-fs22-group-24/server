@@ -221,6 +221,45 @@ public class GameService {
             messageService.sendToUser(player.getUser().getPrincipalName(),gameId+"/cards", cardDTOS);
 
         }
+        //inform which players turn it is
+        Player playerTurn = game.getPlayerTurn();
+        messageService.sendToGame(gameId, "playerTurn", DTOMapper.INSTANCE.convertEntityToUserGetDTO(playerTurn.getUser()));
+
+    }
+
+    public void drawCard(long gameId, User user) {
+        Game game = gameRepository.findByGameId(gameId);
+        Player player = authenticateUser(user, game);
+
+        /*
+        TODO: adjust range, maybe don't use a uniform distribution but something more akin to:
+        0 cards: 30%, 1 card: 20%, 2 cards: 10%, 3 cards: 5% ....
+         */
+
+        int max = 12;
+        int min = 0;
+        int randomCardAmount = (int) ((Math.random() * (max - min)) + min);
+
+        List<CardDTO> cardDTOS = new ArrayList<>();
+        for(int i=0; i< randomCardAmount;i++) {
+            Card card = game.getDeck().drawCard();
+            player.getHand().addCard(card);
+            cardDTOS.add(DTOMapper.INSTANCE.convertCardToCardDTO(card));
+        }
+
+        // inform players of the card count of the drawing player
+        NCardsDTO nCardsDTO = new NCardsDTO();
+        nCardsDTO.setUsername(user.getUsername());
+        nCardsDTO.setnCards(player.getHand().getCardCount());
+        messageService.sendToGame(gameId, "playerHasNCards", nCardsDTO);
+
+        // inform player of the new cards they got
+        messageService.sendToUser(player.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTOS);
+
+        // increase turn and inform players
+        game.nextTurn();
+        Player playerTurn = game.getPlayerTurn();
+        messageService.sendToGame(gameId, "playerTurn", DTOMapper.INSTANCE.convertEntityToUserGetDTO(playerTurn.getUser()));
 
     }
 }

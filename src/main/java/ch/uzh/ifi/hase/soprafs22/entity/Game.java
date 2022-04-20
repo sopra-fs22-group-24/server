@@ -110,4 +110,8 @@ public class Game implements Serializable  {
         Player turnPlayer = players.get(turnIndex);
         return turnPlayer.getUser().getId() == player.getUser().getId();
     }
+
+    public Player getPlayerTurn() {
+        return players.get(turnIndex);
+    }
 }

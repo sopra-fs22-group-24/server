@@ -102,4 +102,13 @@ public class GameController {
         }
     }
 
+    @MessageMapping("/game/{gameId}/drawCard")
+    public void drawCard(StompHeaderAccessor accessor, @DestinationVariable("gameId") long gameId) {
+        User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+        try {
+            gameService.drawCard(gameId, user);
+        } catch (GameException e) {
+            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+        }
+    }
 }
