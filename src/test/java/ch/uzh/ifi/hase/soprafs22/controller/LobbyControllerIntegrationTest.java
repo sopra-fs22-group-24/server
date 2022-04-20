@@ -55,6 +55,8 @@ class LobbyControllerIntegrationTest {
 
     @BeforeEach
     public void setup() {
+        lobbyRepository.deleteAll();
+        userRepository.deleteAll();
         this.webSocketStompClient = new WebSocketStompClient(new SockJsClient(
                 List.of(new WebSocketTransport(new StandardWebSocketClient()))));
         this.webSocketStompClient.setMessageConverter(new MappingJackson2MessageConverter());
@@ -140,7 +142,7 @@ class LobbyControllerIntegrationTest {
         //wait for connection
         blockingQueue.poll(1, SECONDS);
 
-        session.subscribe("/users/queue/messages", new StompFrameHandler() {
+        session.subscribe("/users/queue/joinLobby", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return LobbyPostDTO.class;
@@ -196,7 +198,7 @@ class LobbyControllerIntegrationTest {
         //wait for connection
         blockingQueue.poll(1, SECONDS);
 
-        session.subscribe("/users/queue/messages", new StompFrameHandler() {
+        session.subscribe("/users/queue/joinLobby", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return LobbyPostDTO.class;
@@ -212,7 +214,7 @@ class LobbyControllerIntegrationTest {
         //wait for subscription
         session.send("/app/createLobby","");
         LobbyPostDTO dto = blockingQueue.poll(1, SECONDS);
-        session.subscribe("/lobby/" + dto.getLobbyId() + "/messages", new StompFrameHandler() {
+        session.subscribe("/lobby/" + dto.getLobbyId() + "/userJoined", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return UserGetDTO.class;
@@ -230,7 +232,7 @@ class LobbyControllerIntegrationTest {
         //wait for connection
         blockingQueue.poll(1, SECONDS);
 
-        session2.subscribe("/users/queue/messages", new StompFrameHandler() {
+        session2.subscribe("/users/queue/joinLobby", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return LobbyPostDTO.class;
@@ -242,7 +244,7 @@ class LobbyControllerIntegrationTest {
             }
         });
 
-        session2.subscribe("/lobby/" + dto.getLobbyId() + "/messages", new StompFrameHandler() {
+        session2.subscribe("/lobby/" + dto.getLobbyId() + "/userJoined", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return UserGetDTO.class;

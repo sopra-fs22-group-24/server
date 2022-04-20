@@ -138,7 +138,7 @@ class GameControllerIntegrationTest {
         StompSession session2 = connectWebsocket(u2.getToken());
 
         bq1.poll(1,SECONDS);
-        session1.subscribe("/lobby/"+lobby.getLobbyId()+"/messages", new StompFrameHandler() {
+        session1.subscribe("/lobby/"+lobby.getLobbyId()+"/startGame", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return GameIdDTO.class;
@@ -149,7 +149,7 @@ class GameControllerIntegrationTest {
                 bq1.add((GameIdDTO) payload);
             }
         });
-        session2.subscribe("/lobby/"+lobby.getLobbyId()+"/messages", new StompFrameHandler() {
+        session2.subscribe("/lobby/"+lobby.getLobbyId()+"/startGame", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return GameIdDTO.class;
@@ -194,7 +194,7 @@ class GameControllerIntegrationTest {
 
         bq2.poll(1,SECONDS);
 
-        session2.subscribe("/users/queue/messages", new StompFrameHandler() {
+        session2.subscribe("/users/queue/error", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return ErrorDTO.class;

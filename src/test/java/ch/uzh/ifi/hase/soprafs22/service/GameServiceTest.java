@@ -58,6 +58,7 @@ public class GameServiceTest {
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
 
         User user = new User();
+        user.setId(1l);
         Card card = new Card();
         //gameService.playCard(gameId, user, card);
         assertThrows(PlayerNotInGameException.class, () -> gameService.playCard(gameId, user, card));

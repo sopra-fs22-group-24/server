@@ -17,6 +17,7 @@ public class Deck implements Serializable {
                 deck.add(new Card(color, symbol));
             }
         }
+        Collections.shuffle(deck);
     }
 
     /*

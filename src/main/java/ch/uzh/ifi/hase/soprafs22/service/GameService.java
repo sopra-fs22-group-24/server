@@ -9,13 +9,17 @@ import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.UserNotLobbyAdminExce
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.*;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.CardDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.NCardsDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 @Service
@@ -51,6 +55,7 @@ public class GameService {
         Vector<Player> players = new Vector<>();
         // transform all users of lobby to players
         Deck deck = new Deck();
+
         for(User u: lobby.getPlayers()) {
             Player player = new Player();
             player.setUser(u);
@@ -134,12 +139,12 @@ public class GameService {
         CardDTO cardDTO = new CardDTO();
         cardDTO.setColor(card.getColor());
         cardDTO.setSymbol(card.getSymbol());
-        messageService.sendToGame(game.getGameId(), cardDTO);
+        messageService.sendToGame(game.getGameId(), "topMostCard",cardDTO);
 
         //Inform game which player has their turn now
         UserGetDTO userDTO = new UserGetDTO();
         userDTO.setUsername(player.getUser().getUsername());
-        messageService.sendToGame(game.getGameId(), userDTO);
+        messageService.sendToGame(game.getGameId(), "playerTurn", userDTO);
     }
 
     private boolean cardCanBePlayed(DiscardPile discardPile, Card card) {
@@ -182,5 +187,40 @@ public class GameService {
             return true;
         }
         return false;
+    }
+
+
+    /*
+    After all users joined the initialize will send relevant data (initial hand, first card on discard pile, etc.) to users
+     */
+    public void initialize(long gameId, User user) {
+        Game game = gameRepository.findByGameId(gameId);
+        authenticateUser(user, game);
+
+        // send topMostCard on discard pile
+        Card topMostCard = game.getDiscardPile().getTopmostCard();
+        CardDTO topMostCardDTO = DTOMapper.INSTANCE.convertCardToCardDTO(topMostCard);
+        messageService.sendToGame(gameId, "topMostCard", topMostCardDTO);
+
+        // send cards to specific players and number of cards to all players
+        for(Player player: game.getPlayers()) {
+            Hand hand = player.getHand();
+            // Send nCards to all players
+            NCardsDTO nCardsDTO = new NCardsDTO();
+            nCardsDTO.setUsername(player.getUser().getUsername());
+            nCardsDTO.setnCards(hand.getCardCount());
+            // NCardsDTO nCardsDTO = DTOMapperImpl.INSTANCE.convertEntityToNCardsDTO(player.getUser(),hand.getCardCount());
+            messageService.sendToGame(gameId, "playerHasNCards", nCardsDTO);
+
+            //send cards to specific player
+            List<CardDTO> cardDTOS = new ArrayList<>();
+            for(Card card : hand.getCards()) {
+                CardDTO cardDTO = DTOMapper.INSTANCE.convertCardToCardDTO(card);
+                cardDTOS.add(cardDTO);
+            }
+            messageService.sendToUser(player.getUser().getPrincipalName(),gameId+"/cards", cardDTOS);
+
+        }
+
     }
 }

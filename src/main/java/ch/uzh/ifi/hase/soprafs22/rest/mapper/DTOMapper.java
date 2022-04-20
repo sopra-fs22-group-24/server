@@ -68,4 +68,8 @@ public interface DTOMapper {
 
     @Mapping(source = "gameId", target = "gameId")
     GameIdDTO convertGameToGameIdDTO(Game game);
+
+    @Mapping(source = "symbol",target = "symbol")
+    @Mapping(source = "color",target = "color")
+    Card convertCardDTOToCard(CardDTO cardDTO);
 }

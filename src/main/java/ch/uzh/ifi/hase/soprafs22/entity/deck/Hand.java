@@ -15,7 +15,12 @@ public class Hand implements Serializable {
     }
 
     public boolean containsCard(Card card) {
-        return hand.contains(card);
+        for(Card handCard: hand) {
+            if(handCard.getSymbol() == card.getSymbol() && handCard.getColor() == card.getColor()) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -25,5 +30,9 @@ public class Hand implements Serializable {
 
     public int getCardCount() {
         return hand.size();
+    }
+
+    public Iterable<? extends Card> getCards() {
+        return hand;
     }
 }

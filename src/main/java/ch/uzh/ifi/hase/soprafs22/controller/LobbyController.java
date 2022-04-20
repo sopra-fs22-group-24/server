@@ -86,12 +86,12 @@ public class LobbyController {
         LobbyPostDTO returnDto = DTOMapper.INSTANCE.convertEntityToLobbyPostDTO(lobby);
 
         //Inform user
-        messageService.sendToUser(user.getPrincipalName(),returnDto);
+        messageService.sendToUser(user.getPrincipalName(),"joinLobby",returnDto);
         UserGetDTO userDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
 
         //Inform lobby
 
-        messageService.sendToLobby(lobby.getLobbyId(),userDTO);
+        messageService.sendToLobby(lobby.getLobbyId(), "userJoined",userDTO);
         //simpMessage.convertAndSendToUser(user.getPrincipalName(), "/queue/messages", returnDto);
         log.info("/joinLobby. User {} joined lobby id {}", user.getUsername(),lobby.getLobbyId());
 
@@ -112,7 +112,7 @@ public class LobbyController {
 
         Lobby lobby = lobbyService.createLobby(user);
         LobbyPostDTO dto = DTOMapper.INSTANCE.convertEntityToLobbyPostDTO(lobby);
-        messageService.sendToUser(user.getPrincipalName(), dto);
+        messageService.sendToUser(user.getPrincipalName(), "joinLobby", dto);
         //simpMessage.convertAndSendToUser(accessor.getUser().getName(), "/queue/messages", dto );
         log.info("created Lobby {} for {}",lobby.getLobbyId(),user.getUsername());
     }

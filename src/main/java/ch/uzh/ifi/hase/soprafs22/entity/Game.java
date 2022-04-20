@@ -78,11 +78,13 @@ public class Game implements Serializable  {
 
 
     public Player getPlayerFromUser(User user) {
+        long userId = user.getId();
         for(Player player: players) {
-            System.out.println(player.getUser().getId());
-            System.out.println(user.getId());
-            System.out.println(user.getId() == player.getUser().getId());
-            if (player.getUser().getId() == user.getId()) {
+            // The following does not work somehow
+            // player.getUser().getId() == user.getId()
+            // Therefore cast it to variables
+            long playerId = player.getUser().getId();
+            if (playerId == userId) {
                 return player;
             }
         }

@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -66,7 +67,7 @@ public class GameController {
         try {
             Game game = gameService.createGame(lobbyId, user);
             GameIdDTO gameDto = DTOMapper.INSTANCE.convertGameToGameIdDTO(game);
-            messageService.sendToLobby(lobbyId,gameDto);
+            messageService.sendToLobby(lobbyId, "startGame",gameDto);
             log.info("Successfully created game {} for lobby {} by user {}", game.getGameId(), lobbyId, user.getUsername());
             //simpMessage.convertAndSend(String.format("/lobby/%d/messages", lobbyId), gameDto);
         } catch (GameException e) {
@@ -79,8 +80,11 @@ public class GameController {
     }
 
     @MessageMapping("/game/{gameId}/playCard")
-    public void playCard(StompHeaderAccessor accessor, Card card,@PathVariable("gameId") long gameId) {
+    public void playCard(StompHeaderAccessor accessor, CardDTO cardDTO,@DestinationVariable("gameId") long gameId) {
+        System.out.println(cardDTO.getColor());
+        System.out.println(cardDTO.getSymbol());
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+        Card card  = DTOMapper.INSTANCE.convertCardDTOToCard(cardDTO);
         try {
             gameService.playCard(gameId, user, card);
         } catch (GameException e) {
@@ -88,6 +92,14 @@ public class GameController {
         }
     }
 
-
+    @MessageMapping("/game/{gameId}/init")
+    public void init(StompHeaderAccessor accessor, @DestinationVariable("gameId") long gameId) {
+        User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+        try {
+            gameService.initialize(gameId, user);
+        } catch (GameException e) {
+            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+        }
+    }
 
 }
