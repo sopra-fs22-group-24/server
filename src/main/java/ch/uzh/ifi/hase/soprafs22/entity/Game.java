@@ -31,7 +31,7 @@ public class Game implements Serializable  {
     int turnIndex;
 
     @Column()
-    boolean reverse;
+    boolean reverse=true;
     /*
     @Column(nullable = false)
     private Vector<User> players;
@@ -41,6 +41,9 @@ public class Game implements Serializable  {
     }
     public Long getGameId() {
         return gameId;
+    }
+    public void reverseTurndirection(){
+        reverse=!reverse;
     }
 
     public void setGameId(Long gameId) {
