@@ -107,13 +107,25 @@ public class GameService {
 
         if(card.getSymbol() == Symbol.WILDCARD) {
             //TODO handle Wildcard
-        }
-        else if(card.getSymbol() == Symbol.DISCARD_ALL) {
-            //TODO handle discard all
+            // input wildcard + color
+            // topmost card color set to choosen color
         } else if (card.getSymbol() == Symbol.EXTREME_HIT) {
             //TODO handle Extreme_hit
+            // input extremehit card color and player
+            // set topmost card to color
+            // choosen player has to draw once
+        } else if(card.getSymbol() == Symbol.DISCARD_ALL) {
+            //TODO handle discard all
+            // input discard all card + color
+            // discards all cards of that color from user
+            // discard all doesnt work if it leads to instant win??
+        } else if (card.getSymbol() == Symbol.SKIP) {
+            //TODO handle SKIP
+            // remove card set it on top
+            // skip next players turn
         } else if (card.getSymbol() == Symbol.HIT_2) {
             //TODO handle Hit_2
+            // choosen player has to draw 2 times before next players turn
         } else if (card.getSymbol() == Symbol.REVERSE) {
             // remove card from player hand
             player.getHand().removeCard(card);
@@ -124,7 +136,7 @@ public class GameService {
             game.reverseTurndirection();
             //increase turn
             game.nextTurn();
-
+            // TODO seperate function to avoid code repetition
             //inform game which card was played
             CardDTO cardDTO = new CardDTO();
             cardDTO.setColor(card.getColor());
@@ -138,12 +150,12 @@ public class GameService {
         } else {
             handleNormalCard(game, player, card);
         }
+
     }
 
     private boolean playersTurn(Player player, Game game) {
         return game.checkPlayerTurn(player);
     }
-
     private void handleNormalCard(Game game, Player player, Card card) {
         // remove card from player hand
         player.getHand().removeCard(card);
@@ -207,7 +219,13 @@ public class GameService {
         }
         return false;
     }
-
+    public boolean checkUnoApplicable(Player player){
+        return player.getHand().getCardCount()==1;
+    }
+    // TODO remember if uno was called by the last player whos turn it was
+    public boolean checkIfCalloutApplicable(){
+        return true;
+    }
 
     /*
     After all users joined the initialize will send relevant data (initial hand, first card on discard pile, etc.) to users
@@ -283,6 +301,18 @@ public class GameService {
         game.nextTurn();
         Player playerTurn = game.getPlayerTurn();
         messageService.sendToGame(gameId, "playerTurn", DTOMapper.INSTANCE.convertEntityToUserGetDTO(playerTurn.getUser()));
+
+    }
+
+    // send to message to all players to update topmost card
+    private void informPlayers_TopMostCard(){
+    }
+    //update nrOfCardsInHand for other players after player played a card
+    private void informPlayers_nrOfCardsInHandPlayerX(){
+
+    }
+    // informPlayerToDraw and wait until cards drawn
+    private void informPlayerToDraw(){
 
     }
 }
