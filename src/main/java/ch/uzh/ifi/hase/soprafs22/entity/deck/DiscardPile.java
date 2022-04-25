@@ -12,6 +12,14 @@ public class DiscardPile implements Serializable {
         discardPile = new Vector<>();
     }
 
+    public Vector<Card >emptyDiscardPileExceptTopMostCard(){
+        Card TopMostCard = getTopmostCard();
+        discardPile.remove(discardPile.size()-1);
+        Vector<Card> cardsToReturn = discardPile;
+        discardPile = new Vector<>();
+        discardCard(TopMostCard);
+        return cardsToReturn;
+    }
     public void discardCard(Card card) {
         discardPile.add(card);
     }

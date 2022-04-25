@@ -37,6 +37,10 @@ public class Deck implements Serializable {
         Card card = deck.remove(deck.size()-1);
         return card;
     }
+    //to avoid indexOutOfBounds when deck is empty
+    public boolean deckIsEmpty(){
+        return deck.isEmpty();
+    }
 
 
 

@@ -261,6 +261,10 @@ public class GameService {
 
         List<CardDTO> cardDTOS = new ArrayList<>();
         for(int i=0; i< randomCardAmount;i++) {
+            //check if deck is empty else refill it
+            if(game.getDeck().deckIsEmpty()){
+                game.getDeck().shuffle(game.getDiscardPile().emptyDiscardPileExceptTopMostCard());
+            }
             Card card = game.getDeck().drawCard();
             player.getHand().addCard(card);
             cardDTOS.add(DTOMapper.INSTANCE.convertCardToCardDTO(card));
