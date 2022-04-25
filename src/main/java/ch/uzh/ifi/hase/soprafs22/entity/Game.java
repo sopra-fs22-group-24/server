@@ -47,7 +47,9 @@ public class Game implements Serializable  {
         this.gameId = gameId;
     }
 
-
+    public void reverseturndirection(){
+        reverse=!reverse;
+    }
     public Deck getDeck() {
         return deck;
     }

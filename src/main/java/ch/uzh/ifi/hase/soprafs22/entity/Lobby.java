@@ -2,18 +2,27 @@ package ch.uzh.ifi.hase.soprafs22.entity;
 
 
 
+import org.hibernate.annotations.ColumnDefault;
+
 import javax.persistence.*;
 import java.util.Vector;
 
 @Entity
 @Table(name = "LOBBY")
-public class Lobby {
+public class  Lobby {
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue
     Long lobbyId;
 
+    @ColumnDefault("true")
+    @Column(nullable = false)
+    Boolean IsLobbyJoinable;
+
+
+    @Column(nullable = false)
+    User owner;
     @Column(nullable = false, length = 32768)
     Vector<User> players;
 

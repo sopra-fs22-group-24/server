@@ -115,7 +115,27 @@ public class GameService {
         } else if (card.getSymbol() == Symbol.HIT_2) {
             //TODO handle Hit_2
         } else if (card.getSymbol() == Symbol.REVERSE) {
-            //TODO handle Reverse
+            // remove card from player hand
+            player.getHand().removeCard(card);
+
+            //place card in discard pile
+            game.getDiscardPile().discardCard(card);
+            //reverse play direction
+            game.reverseturndirection();
+            //increase Turn
+            game.nextTurn();
+            //inform game which card was played
+            CardDTO cardDTO = new CardDTO();
+            cardDTO.setColor(card.getColor());
+            cardDTO.setSymbol(card.getSymbol());
+            messageService.sendToGame(game.getGameId(), "topMostCard",cardDTO);
+
+            //Inform game which player has their turn now
+            UserGetDTO userDTO = new UserGetDTO();
+            userDTO.setUsername(player.getUser().getUsername());
+            messageService.sendToGame(game.getGameId(), "playerTurn", userDTO);
+
+
         } else {
             handleNormalCard(game, player, card);
         }

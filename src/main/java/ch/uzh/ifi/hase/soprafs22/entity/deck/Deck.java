@@ -33,7 +33,14 @@ public class Deck implements Serializable {
     /*
     returns the last card (index wise) from the deck and removes it from the deck
      */
+    // to avoid index out of bounds exeption we check in game if card can be drawn
     public Card drawCard() {
+        //check if deck is empty if so shuffle
+        if(deck.isEmpty()){
+            return null;
+
+        }
+
         Card card = deck.remove(deck.size()-1);
         return card;
     }
