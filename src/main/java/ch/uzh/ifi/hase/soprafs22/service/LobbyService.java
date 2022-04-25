@@ -56,7 +56,6 @@ public class LobbyService {
         if (lobby == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-
         lobby.addUser(user);
         lobbyRepository.save(lobby);
         lobbyRepository.flush();
