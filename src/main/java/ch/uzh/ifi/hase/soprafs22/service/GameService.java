@@ -83,6 +83,7 @@ public class GameService {
 
     public void playCard(long gameId, User user, Card card) {
         // TODO check out if there are python like decorators for error handling
+        // TODO persist changes in game
         //check game
         Game game = getGameFromGameId(gameId);
 
@@ -106,9 +107,22 @@ public class GameService {
         }
 
         if(card.getSymbol() == Symbol.WILDCARD) {
-            //TODO handle Wildcard
-            // input wildcard + color
+            // input wildcard + color color taken from card attribute
             // topmost card color set to choosen color
+            //remove card from players hand
+            player.getHand().removeCard(card);
+            //set choosen color
+            // is already set in Attribute color in client but check if not null
+            if(card.getColor()==null){
+                throw new CardColorNotChoosenException();
+                //messageService.sendErrorToUser(user.getPrincipalName(), "CardColorNotChoosen");
+
+            }
+            //set card on Top
+            game.getDiscardPile().discardCard(card);
+            game.nextTurn();
+
+
         } else if (card.getSymbol() == Symbol.EXTREME_HIT) {
             //TODO handle Extreme_hit
             // input extremehit card color and player
@@ -120,12 +134,17 @@ public class GameService {
             // discards all cards of that color from user
             // discard all doesnt work if it leads to instant win??
         } else if (card.getSymbol() == Symbol.SKIP) {
-            //TODO handle SKIP
-            // remove card set it on top
+            // remove card & set it on top
+            player.getHand().removeCard(card);
+            game.getDiscardPile().discardCard(card);
             // skip next players turn
+            game.nextTurn();
+            game.nextTurn();
+
+            // TODO call inform functions ( maybe we can do it at the end because all moves need similar updates
         } else if (card.getSymbol() == Symbol.HIT_2) {
             //TODO handle Hit_2
-            // choosen player has to draw 2 times before next players turn
+            // next player has to draw 2 times before next players turn
         } else if (card.getSymbol() == Symbol.REVERSE) {
             // remove card from player hand
             player.getHand().removeCard(card);
@@ -136,21 +155,16 @@ public class GameService {
             game.reverseTurndirection();
             //increase turn
             game.nextTurn();
-            // TODO seperate function to avoid code repetition
             //inform game which card was played
-            CardDTO cardDTO = new CardDTO();
-            cardDTO.setColor(card.getColor());
-            cardDTO.setSymbol(card.getSymbol());
-            messageService.sendToGame(game.getGameId(), "topMostCard",cardDTO);
+            informPlayers_TopMostCard(game,card);
 
             //Inform game which player has their turn now
-            UserGetDTO userDTO = new UserGetDTO();
-            userDTO.setUsername(player.getUser().getUsername());
-            messageService.sendToGame(game.getGameId(), "playerTurn", userDTO);
+            informPlayerToTurn(game);
         } else {
             handleNormalCard(game, player, card);
         }
-
+        // TODO persist changes to game from move
+        // TODO maybe update the player/players State here because always topmost card & nrOfcardPlayerx and next turn called
     }
 
     private boolean playersTurn(Player player, Game game) {
@@ -167,15 +181,10 @@ public class GameService {
         game.nextTurn();
 
         //inform game which card was played
-        CardDTO cardDTO = new CardDTO();
-        cardDTO.setColor(card.getColor());
-        cardDTO.setSymbol(card.getSymbol());
-        messageService.sendToGame(game.getGameId(), "topMostCard",cardDTO);
+        informPlayers_TopMostCard(game, card);
 
         //Inform game which player has their turn now
-        UserGetDTO userDTO = new UserGetDTO();
-        userDTO.setUsername(player.getUser().getUsername());
-        messageService.sendToGame(game.getGameId(), "playerTurn", userDTO);
+        informPlayerToTurn(game);
     }
 
     private boolean cardCanBePlayed(DiscardPile discardPile, Card card) {
@@ -319,7 +328,7 @@ public class GameService {
         Long gameId = game.getGameId();
         messageService.sendToGame(gameId, "playerHasNCards", nCardsDTO);
     }
-    // informPlayerToDraw and wait until cards drawn
+    // informPlayersTurn
     private void informPlayerToTurn(Game game){
         Long gameId = game.getGameId();
         Player playerTurn = game.getPlayerTurn();
