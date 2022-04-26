@@ -305,14 +305,25 @@ public class GameService {
     }
 
     // send to message to all players to update topmost card
-    private void informPlayers_TopMostCard(){
+    private void informPlayers_TopMostCard(Game game, Card card){
+        CardDTO cardDTO = new CardDTO();
+        cardDTO.setColor(card.getColor());
+        cardDTO.setSymbol(card.getSymbol());
+        messageService.sendToGame(game.getGameId(), "topMostCard",cardDTO);
     }
     //update nrOfCardsInHand for other players after player played a card
-    private void informPlayers_nrOfCardsInHandPlayerX(){
-
+    private void informPlayers_nrOfCardsInHandPlayerX(Player player, Game game){
+        NCardsDTO nCardsDTO = new NCardsDTO();
+        nCardsDTO.setUsername(player.getUser().getUsername());
+        nCardsDTO.setnCards(player.getHand().getCardCount());
+        Long gameId = game.getGameId();
+        messageService.sendToGame(gameId, "playerHasNCards", nCardsDTO);
     }
     // informPlayerToDraw and wait until cards drawn
-    private void informPlayerToDraw(){
+    private void informPlayerToTurn(Game game){
+        Long gameId = game.getGameId();
+        Player playerTurn = game.getPlayerTurn();
+        messageService.sendToGame(gameId, "playerTurn", DTOMapper.INSTANCE.convertEntityToUserGetDTO(playerTurn.getUser()));
 
     }
 }
