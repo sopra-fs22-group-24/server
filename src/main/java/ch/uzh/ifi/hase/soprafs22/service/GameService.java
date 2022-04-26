@@ -155,16 +155,16 @@ public class GameService {
             game.reverseTurndirection();
             //increase turn
             game.nextTurn();
-            //inform game which card was played
-            informPlayers_TopMostCard(game,card);
 
-            //Inform game which player has their turn now
-            informPlayerToTurn(game);
         } else {
             handleNormalCard(game, player, card);
         }
         // TODO persist changes to game from move
+        gameRepository.saveAndFlush(game);
         // TODO maybe update the player/players State here because always topmost card & nrOfcardPlayerx and next turn called
+        informPlayers_TopMostCard(game,card);
+        informPlayers_nrOfCardsInHandPlayerX(player, game);
+        informPlayerToTurn(game);
     }
 
     private boolean playersTurn(Player player, Game game) {
@@ -180,11 +180,6 @@ public class GameService {
         //increase turn
         game.nextTurn();
 
-        //inform game which card was played
-        informPlayers_TopMostCard(game, card);
-
-        //Inform game which player has their turn now
-        informPlayerToTurn(game);
     }
 
     private boolean cardCanBePlayed(DiscardPile discardPile, Card card) {
