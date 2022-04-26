@@ -10,6 +10,7 @@ public class Deck implements Serializable {
     private Vector<Card> deck;
 
     public Deck() {
+        // TODO discard all cards 4 each color once
         this.deck = new Vector<Card>();
         // initialize deck
         for(Color color: Color.values() ) {

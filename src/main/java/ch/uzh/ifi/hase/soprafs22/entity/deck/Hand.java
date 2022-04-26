@@ -32,7 +32,7 @@ public class Hand implements Serializable {
         return hand.size();
     }
 
-    public Iterable<? extends Card> getCards() {
+    public Iterable<Card> getCards() {
         return hand;
     }
 }
