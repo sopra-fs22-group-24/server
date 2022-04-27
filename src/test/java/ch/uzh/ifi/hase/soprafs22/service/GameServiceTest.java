@@ -9,6 +9,7 @@ import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.*;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.LobbyRepository;
 import ch.uzh.ifi.hase.soprafs22.service.GameService;
+import ch.uzh.ifi.hase.soprafs22.utils.Globals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -33,6 +34,8 @@ public class GameServiceTest {
     @Mock
     LobbyService lobbyService;
 
+    @Mock
+    Globals globals;
     @InjectMocks
     private GameService gameService;
 
@@ -47,7 +50,7 @@ public class GameServiceTest {
         long gameId = 128;
         Card card = new Card();
 
-        assertThrows(GameNotExistsException.class,() -> gameService.playCard(gameId, user, card));
+        assertThrows(GameNotExistsException.class,() -> gameService.playCard(gameId, user, card, null, false));
     }
 
     @Test
@@ -61,7 +64,7 @@ public class GameServiceTest {
         user.setId(1l);
         Card card = new Card();
         //gameService.playCard(gameId, user, card);
-        assertThrows(PlayerNotInGameException.class, () -> gameService.playCard(gameId, user, card));
+        assertThrows(PlayerNotInGameException.class, () -> gameService.playCard(gameId, user, card, null, false));
     }
 
     @Test
@@ -87,7 +90,7 @@ public class GameServiceTest {
 
         Card card = new Card();
         //gameService.playCard(gameId, user, card);
-        assertThrows(NotPlayerTurnException.class, () -> gameService.playCard(gameId, user2, card));
+        assertThrows(NotPlayerTurnException.class, () -> gameService.playCard(gameId, user2, card, null, false));
     }
 
     @Test
@@ -115,7 +118,7 @@ public class GameServiceTest {
 
         Card card = new Card(Color.BLUE, Symbol.EIGHT);
         //gameService.playCard(gameId, user, card);
-        assertThrows(CardNotInHandException.class, () -> gameService.playCard(gameId, user, card));
+        assertThrows(CardNotInHandException.class, () -> gameService.playCard(gameId, user, card, null, false));
     }
 
     @Test
@@ -148,7 +151,7 @@ public class GameServiceTest {
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
 
         //gameService.playCard(gameId, user, card);
-        assertThrows(CardNotPlayableException.class, () -> gameService.playCard(gameId, user, card));
+        assertThrows(CardNotPlayableException.class, () -> gameService.playCard(gameId, user, card, null, false));
     }
 
     @Test
@@ -169,8 +172,11 @@ public class GameServiceTest {
         player2.setUser(user2);
 
         Card card = new Card(Color.BLUE, Symbol.EIGHT);
+        Card card2 = new Card(Color.RED, Symbol.EIGHT);
+
         Hand hand = new Hand();
         hand.addCard(card);
+        hand.addCard(card2);
 
         player1.setHand(hand);
 
@@ -186,9 +192,10 @@ public class GameServiceTest {
 
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
 
-        gameService.playCard(gameId, user1, card);
+        gameService.playCard(gameId, user1, card, null, false);
 
         assertFalse(player1.getHand().containsCard(card), "card still in player hand");
+        assertEquals( 1, player1.getHand().getCardCount(), "card count is wrong");
         Card topMostCard = pile.getTopmostCard();
         assertEquals(topMostCard.getColor(), card.getColor(), "Color not the same");
         assertEquals(topMostCard.getSymbol(), card.getSymbol(), "Symbol not the same");
@@ -245,4 +252,126 @@ public class GameServiceTest {
         assertEquals(7, game.getPlayers().get(1).getHand().getCardCount());
 
     }
+
+    @Test
+    public void playCard_whenSkip_thenIncreaseTurnByTwo() {
+        Game game = new Game();
+        long gameId = 128;
+        game.setGameId(gameId);
+        User user1 = new User();
+        user1.setId(1l);
+
+        User user2 = new User();
+        user2.setId(2l);
+
+        User user3 = new User();
+        user3.setId(3l);
+
+        Player player1 = new Player();
+        player1.setUser(user1);
+
+        Player player2 = new Player();
+        player2.setUser(user2);
+
+        Player player3 = new Player();
+        player3.setUser(user3);
+
+
+
+        Card card = new Card(Color.BLUE, Symbol.SKIP);
+        Card card2 = new Card(Color.RED, Symbol.EIGHT);
+
+        Hand hand = new Hand();
+        hand.addCard(card);
+        hand.addCard(card2);
+
+        player1.setHand(hand);
+
+        Vector<Player> players = new Vector<>();
+        players.add(player1);
+        players.add(player2);
+        players.add(player3);
+
+        game.setPlayers(players);
+        DiscardPile pile = new DiscardPile();
+        pile.discardCard(new Card(Color.BLUE, Symbol.DISCARD_ALL));
+
+        game.setDiscardPile(pile);
+
+
+
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        gameService.playCard(gameId, user1, card, null, false);
+
+        assertFalse(player1.getHand().containsCard(card), "card still in player hand");
+        assertEquals( 1, player1.getHand().getCardCount(), "card count is wrong");
+        Card topMostCard = pile.getTopmostCard();
+        assertEquals(topMostCard.getColor(), card.getColor(), "Color not the same");
+        assertEquals(topMostCard.getSymbol(), card.getSymbol(), "Symbol not the same");
+
+        assertTrue(game.checkPlayerTurn(player3), "Turn order not increased");
+    }
+
+    @Test
+    public void playCard_whenHit2_thenNextPlayerHasToDraw() {
+        /*
+        WARNING FLAKY TEST
+        In this test we test a function that uses randomness, because of this there is the possibility that a player
+        doesn't have to draw a card and this test will fail.
+        If this test fails retry and hopefully it will pass.
+         */
+        Game game = new Game();
+        long gameId = 128;
+        game.setGameId(gameId);
+        User user1 = new User();
+        user1.setId(1l);
+
+        User user2 = new User();
+        user2.setId(2l);
+
+        Player player1 = new Player();
+        player1.setUser(user1);
+
+        Player player2 = new Player();
+        player2.setUser(user2);
+
+        Card card = new Card(Color.BLUE, Symbol.HIT_2);
+        Card card2 = new Card(Color.RED, Symbol.EIGHT);
+
+        Hand hand = new Hand();
+        hand.addCard(card);
+        hand.addCard(card2);
+
+        player1.setHand(hand);
+        Hand hand2 = new Hand();
+        player2.setHand(hand2);
+
+        Vector<Player> players = new Vector<>();
+        players.add(player1);
+        players.add(player2);
+
+        game.setPlayers(players);
+        DiscardPile pile = new DiscardPile();
+        pile.discardCard(new Card(Color.BLUE, Symbol.DISCARD_ALL));
+        game.setDiscardPile(pile);
+
+        Deck deck = new Deck();
+        game.setDeck(deck);
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        gameService.playCard(gameId, user1, card, null, false);
+
+
+
+        assertFalse(player1.getHand().containsCard(card), "card still in player hand");
+        assertEquals( 1, player1.getHand().getCardCount(), "card count is wrong");
+        Card topMostCard = pile.getTopmostCard();
+        assertEquals(topMostCard.getColor(), card.getColor(), "Color not the same");
+        assertEquals(topMostCard.getSymbol(), card.getSymbol(), "Symbol not the same");
+        assertTrue(0 < player2.getHand().getCardCount(), "player 2 didn't draw");
+
+    }
+
 }

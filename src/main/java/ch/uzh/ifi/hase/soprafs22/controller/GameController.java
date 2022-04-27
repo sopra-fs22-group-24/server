@@ -1,16 +1,8 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 import ch.uzh.ifi.hase.soprafs22.entity.Game;
-import ch.uzh.ifi.hase.soprafs22.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.Card;
-import ch.uzh.ifi.hase.soprafs22.entity.deck.Color;
-import ch.uzh.ifi.hase.soprafs22.entity.deck.Symbol;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.GameException;
-import ch.uzh.ifi.hase.soprafs22.messagingObjects.Message;
-import ch.uzh.ifi.hase.soprafs22.messagingObjects.Response;
-import ch.uzh.ifi.hase.soprafs22.messagingObjects.Hello;
-import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
-import ch.uzh.ifi.hase.soprafs22.repository.LobbyRepository;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.GameService;
@@ -20,21 +12,14 @@ import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.HtmlUtils;
 
-import java.security.Principal;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
+
 
 @Controller
 public class GameController {
@@ -80,13 +65,15 @@ public class GameController {
     }
 
     @MessageMapping("/game/{gameId}/playCard")
-    public void playCard(StompHeaderAccessor accessor, CardDTO cardDTO,@DestinationVariable("gameId") long gameId) {
-        System.out.println(cardDTO.getColor());
-        System.out.println(cardDTO.getSymbol());
+//    public void playCard(StompHeaderAccessor accessor, CardDTO cardDTO,UserPostDTO otherUserDTO, UNODTO unoDTO, @DestinationVariable("gameId") long gameId) {
+    public void playCard(StompHeaderAccessor accessor, PlayCardDTO playCardDTO, @DestinationVariable("gameId") long gameId) {
+        System.out.println("hello");
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
-        Card card  = DTOMapper.INSTANCE.convertCardDTOToCard(cardDTO);
+        Card card  = playCardDTO.getCard();
+        User otherUser = playCardDTO.getUser();
+        boolean uno = playCardDTO.getUno();
         try {
-            gameService.playCard(gameId, user, card);
+            gameService.playCard(gameId, user, card, otherUser, uno);
         } catch (GameException e) {
             messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
         }

@@ -31,7 +31,7 @@ public class Game implements Serializable  {
     int turnIndex;
 
     @Column()
-    boolean reverse=true;
+    boolean reverse=false;
     /*
     @Column(nullable = false)
     private Vector<User> players;
@@ -116,5 +116,22 @@ public class Game implements Serializable  {
 
     public Player getPlayerTurn() {
         return players.get(turnIndex);
+    }
+
+    public Player getNextPlayer() {
+        int turnIndexCopy = turnIndex;
+        if(reverse) {
+            turnIndexCopy--;
+        } else {
+            turnIndexCopy++;
+        }
+        if(turnIndexCopy < 0) {
+            turnIndexCopy = players.size()-1;
+        }
+        if(turnIndexCopy >= players.size()) {
+            turnIndexCopy = 0;
+        }
+
+        return players.get(turnIndexCopy);
     }
 }

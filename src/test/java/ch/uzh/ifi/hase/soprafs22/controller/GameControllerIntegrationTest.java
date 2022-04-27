@@ -215,4 +215,6 @@ class GameControllerIntegrationTest {
         assertEquals(dto2.getError(), UserNotLobbyAdminException.class.getSimpleName());
 
     }
+
+
 }

@@ -12,6 +12,7 @@ import ch.uzh.ifi.hase.soprafs22.rest.dto.CardDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.NCardsDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
+import ch.uzh.ifi.hase.soprafs22.utils.Globals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +82,7 @@ public class GameService {
 
     }
 
-    public void playCard(long gameId, User user, Card card) {
+    public void playCard(long gameId, User user, Card card, User otherUser, boolean uno) {
         // TODO check out if there are python like decorators for error handling
         // TODO persist changes in game
         //check game
@@ -110,7 +111,6 @@ public class GameService {
             // input wildcard + color color taken from card attribute
             // topmost card color set to choosen color
             //remove card from players hand
-            player.getHand().removeCard(card);
             //set choosen color
             // is already set in Attribute color in client but check if not null
             if(card.getColor()==null){
@@ -118,6 +118,7 @@ public class GameService {
                 //messageService.sendErrorToUser(user.getPrincipalName(), "CardColorNotChoosen");
 
             }
+            player.getHand().removeCard(card);
             //set card on Top
             game.getDiscardPile().discardCard(card);
             game.nextTurn();
@@ -128,6 +129,19 @@ public class GameService {
             // input extremehit card color and player
             // set topmost card to color
             // choosen player has to draw once
+            if(card.getColor()==null){
+                throw new CardColorNotChoosenException();
+                //messageService.sendErrorToUser(user.getPrincipalName(), "CardColorNotChoosen");
+
+            }
+            player.getHand().removeCard(card);
+            //set card on Top
+            game.getDiscardPile().discardCard(card);
+            Player victim = game.getPlayerFromUser(otherUser);
+            List<CardDTO> cardDTOS = playerDrawsCard(game, victim);
+            messageService.sendToUser(victim.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTOS);
+
+            game.nextTurn();
         } else if(card.getSymbol() == Symbol.DISCARD_ALL) {
             //TODO handle discard all
             // input discard all card + color
@@ -145,6 +159,22 @@ public class GameService {
         } else if (card.getSymbol() == Symbol.HIT_2) {
             //TODO handle Hit_2
             // next player has to draw 2 times before next players turn
+
+            // find next player
+            Player victim = game.getNextPlayer();
+            // Let them draw twice
+            List<CardDTO> cardDTOS1 = playerDrawsCard(game, victim);
+            List<CardDTO> cardDTOS2 = playerDrawsCard(game, victim);
+            cardDTOS1.addAll(cardDTOS2);
+            //remove card from player hand
+            player.getHand().removeCard(card);
+            //set card on Top
+            game.getDiscardPile().discardCard(card);
+            game.nextTurn();
+            // send drawn cards
+            messageService.sendToUser(victim.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTOS1);
+            game.nextTurn();
+            game.nextTurn();
         } else if (card.getSymbol() == Symbol.REVERSE) {
             // remove card from player hand
             player.getHand().removeCard(card);
@@ -272,25 +302,7 @@ public class GameService {
         Game game = gameRepository.findByGameId(gameId);
         Player player = authenticateUser(user, game);
 
-        /*
-        TODO: adjust range, maybe don't use a uniform distribution but something more akin to:
-        0 cards: 30%, 1 card: 20%, 2 cards: 10%, 3 cards: 5% ....
-         */
-
-        int max = 12;
-        int min = 0;
-        int randomCardAmount = (int) ((Math.random() * (max - min)) + min);
-
-        List<CardDTO> cardDTOS = new ArrayList<>();
-        for(int i=0; i< randomCardAmount;i++) {
-            //check if deck is empty else refill it
-            if(game.getDeck().deckIsEmpty()){
-                game.getDeck().shuffle(game.getDiscardPile().emptyDiscardPileExceptTopMostCard());
-            }
-            Card card = game.getDeck().drawCard();
-            player.getHand().addCard(card);
-            cardDTOS.add(DTOMapper.INSTANCE.convertCardToCardDTO(card));
-        }
+        List<CardDTO> cardDTOS = playerDrawsCard(game, player);
 
         // inform players of the card count of the drawing player
         NCardsDTO nCardsDTO = new NCardsDTO();
@@ -308,6 +320,28 @@ public class GameService {
 
     }
 
+    private List<CardDTO> playerDrawsCard(Game game, Player player) {
+        /*
+        TODO: adjust range, maybe don't use a uniform distribution but something more akin to:
+        0 cards: 30%, 1 card: 20%, 2 cards: 10%, 3 cards: 5% ....
+         */
+
+        int max = Globals.maxDrawCount();
+        int min = Globals.minDrawCount();
+        int randomCardAmount = (int) ((Math.random() * (max - min)) + min);
+
+        List<CardDTO> cardDTOS = new ArrayList<>();
+        for(int i=0; i< randomCardAmount;i++) {
+            //check if deck is empty else refill it
+            if(game.getDeck().deckIsEmpty()){
+                game.getDeck().shuffle(game.getDiscardPile().emptyDiscardPileExceptTopMostCard());
+            }
+            Card card = game.getDeck().drawCard();
+            player.getHand().addCard(card);
+            cardDTOS.add(DTOMapper.INSTANCE.convertCardToCardDTO(card));
+        }
+        return cardDTOS;
+    }
     // send to message to all players to update topmost card
     private void informPlayers_TopMostCard(Game game, Card card){
         CardDTO cardDTO = new CardDTO();

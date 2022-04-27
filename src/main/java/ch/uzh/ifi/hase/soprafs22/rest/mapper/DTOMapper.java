@@ -72,4 +72,11 @@ public interface DTOMapper {
     @Mapping(source = "symbol",target = "symbol")
     @Mapping(source = "color",target = "color")
     Card convertCardDTOToCard(CardDTO cardDTO);
+
+    UNODTO convertUNODTOToEntity(UNODTO unoDTO);
+
+    @Mapping(source = "card", target = "card")
+    @Mapping(source = "user", target = "user")
+    @Mapping(source = "uno", target = "uno")
+    PlayCardDTO convertPlayCardDTOToEntity(PlayCardDTO playCardDTO);
 }
