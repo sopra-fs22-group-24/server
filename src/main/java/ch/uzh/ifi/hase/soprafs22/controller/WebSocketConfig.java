@@ -31,8 +31,9 @@ public class WebSocketConfig /*extends WebSocketMessageBrokerConfigurationSuppor
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-connect")
                 .setHandshakeHandler(handshakeHandler)
-                .setAllowedOrigins("http://localhost:3000")
+                .setAllowedOrigins("*")
                 .withSockJS();
+
     }
     /*
     @Override
