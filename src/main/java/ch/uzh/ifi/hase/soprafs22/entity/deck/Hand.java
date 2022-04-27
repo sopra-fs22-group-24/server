@@ -25,7 +25,14 @@ public class Hand implements Serializable {
 
 
     public void removeCard(Card card) {
-        hand.remove(card);
+        for(int i=0; i<hand.size();i++) {
+
+            Card handCard = hand.get(i);
+            if (handCard.getSymbol() == card.getSymbol() && handCard.getColor() == card.getColor()) {
+                hand.remove(i);
+                return;
+            }
+        }
     }
 
     public int getCardCount() {
