@@ -203,55 +203,6 @@ public class GameServiceTest {
         assertTrue(game.checkPlayerTurn(player2), "Turn order not increased");
     }
 
-    @Test
-    public void startGame_whenPlayerNotAdmin_thenThrowException() {
-        //Atm the user with index 0 in the lobby is the admin
-
-        User u1 = new User();
-        User u2 = new User();
-
-        u1.setId(1l);
-        u2.setId(2l);
-
-        long lobbyId = 1;
-        Lobby lobby = new Lobby();
-        lobby.setLobbyId(lobbyId);
-        lobby.addUser(u1);
-        lobby.addUser(u2);
-
-
-        Mockito.when(lobbyService.findByLobbyId(lobbyId)).thenReturn(lobby);
-
-        assertThrows(UserNotLobbyAdminException.class,() -> gameService.createGame(lobbyId,u2));
-
-    }
-
-    @Test
-    public void startGame_whenSuccessful_thenEachPlayerInGameAndHasHand() {
-        //Atm the user with index 0 in the lobby is the admin
-
-        User u1 = new User();
-        User u2 = new User();
-
-        u1.setId(1l);
-        u2.setId(2l);
-
-        long lobbyId = 1;
-        Lobby lobby = new Lobby();
-        lobby.setLobbyId(lobbyId);
-        lobby.addUser(u1);
-        lobby.addUser(u2);
-
-
-        Mockito.when(lobbyService.findByLobbyId(lobbyId)).thenReturn(lobby);
-        Mockito.when(gameRepository.save(Mockito.any())).then(AdditionalAnswers.returnsFirstArg());
-        Game game = gameService.createGame(lobbyId,u1);
-        assertEquals(u1.getId(),game.getPlayers().get(0).getUser().getId());
-        assertEquals(u2.getId(),game.getPlayers().get(1).getUser().getId());
-        assertEquals(7, game.getPlayers().get(0).getHand().getCardCount());
-        assertEquals(7, game.getPlayers().get(1).getHand().getCardCount());
-
-    }
 
     @Test
     public void playCard_whenSkip_thenIncreaseTurnByTwo() {
@@ -374,4 +325,88 @@ public class GameServiceTest {
 
     }
 
+    @Test
+    public void startGame_whenPlayerNotAdmin_thenThrowException() {
+        //Atm the user with index 0 in the lobby is the admin
+
+        User u1 = new User();
+        User u2 = new User();
+
+        u1.setId(1l);
+        u2.setId(2l);
+
+        long lobbyId = 1;
+        Lobby lobby = new Lobby();
+        lobby.setLobbyId(lobbyId);
+        lobby.addUser(u1);
+        lobby.addUser(u2);
+
+
+        Mockito.when(lobbyService.findByLobbyId(lobbyId)).thenReturn(lobby);
+
+        assertThrows(UserNotLobbyAdminException.class,() -> gameService.createGame(lobbyId,u2));
+
+    }
+
+    @Test
+    public void startGame_whenSuccessful_thenEachPlayerInGameAndHasHand() {
+        //Atm the user with index 0 in the lobby is the admin
+
+        User u1 = new User();
+        User u2 = new User();
+
+        u1.setId(1l);
+        u2.setId(2l);
+
+        long lobbyId = 1;
+        Lobby lobby = new Lobby();
+        lobby.setLobbyId(lobbyId);
+        lobby.addUser(u1);
+        lobby.addUser(u2);
+
+
+        Mockito.when(lobbyService.findByLobbyId(lobbyId)).thenReturn(lobby);
+        Mockito.when(gameRepository.save(Mockito.any())).then(AdditionalAnswers.returnsFirstArg());
+        Game game = gameService.createGame(lobbyId,u1);
+        assertEquals(u1.getId(),game.getPlayers().get(0).getUser().getId());
+        assertEquals(u2.getId(),game.getPlayers().get(1).getUser().getId());
+        assertEquals(7, game.getPlayers().get(0).getHand().getCardCount());
+        assertEquals(7, game.getPlayers().get(1).getHand().getCardCount());
+
+    }
+
+    @Test
+    public void getGameFromGameId_Success(){}
+
+    @Test
+    public void getGameFromGameId_ThrowsExeption_GameNotExists(){}
+
+    @Test
+    public void hasCardInHand_Positive(){}
+
+    @Test
+    public void hasCardInHand_Negative(){}
+
+    @Test
+    public void checkUnoCanBeCalled_Positive(){}
+
+    @Test
+    public void checkUnoCanBeCalled_Negative(){}
+    @Test
+    public void initialize_Sucess(){}
+
+    @Test
+    public void drawCard_sucess(){}
+
+    @Test
+    public void drawCard_Throws_gameNotExistsException(){}
+
+    @Test
+    public void drawCard_Throws_playerInGameException(){}
+
+    @Test
+    public void callOutPlayer_Positive(){}
+
+    @Test
+    public void callOutPlayer_Negative(){}
 }

@@ -321,7 +321,7 @@ public class GameService {
     }
 
     public void drawCard(long gameId, User user) {
-        Game game = gameRepository.findByGameId(gameId);
+        Game game = getGameFromGameId(gameId);
         Player player = authenticateUser(user, game);
 
         List<CardDTO> cardDTOS = playerDrawsCard(game, player);
