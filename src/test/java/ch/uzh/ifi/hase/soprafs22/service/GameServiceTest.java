@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.persistence.Lob;
+import java.util.Random;
 import java.util.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +31,9 @@ public class GameServiceTest {
 
     @Mock
     MessageService messageService;
+
+    @Mock
+    Random random;
 
     @Mock
     LobbyService lobbyService;
@@ -360,7 +364,7 @@ public class GameServiceTest {
         Deck deck = new Deck();
         game.setDeck(deck);
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
-
+        Mockito.when(random.nextInt(12)).thenReturn(1);
         gameService.playCard(gameId, user1, card, null, false);
 
 
@@ -370,8 +374,195 @@ public class GameServiceTest {
         Card topMostCard = pile.getTopmostCard();
         assertEquals(topMostCard.getColor(), card.getColor(), "Color not the same");
         assertEquals(topMostCard.getSymbol(), card.getSymbol(), "Symbol not the same");
-        assertTrue(0 < player2.getHand().getCardCount(), "player 2 didn't draw");
+        assertEquals(2, player2.getHand().getCardCount(), "player 2 didn't draw");
 
     }
 
+    @Test
+    public void playCard_WhenWildcard_thenSetColorCorrectly() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        Card card = new Card(Color.BLUE, Symbol.WILDCARD);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+        User u = new User();
+        u.setId(1l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        gameService.playCard(gameId, u, card,null, false);
+
+        Card topMostCard = d.getTopmostCard();
+        assertEquals(card.getColor(),topMostCard.getColor());
+        assertEquals(card.getSymbol(),topMostCard.getSymbol());
+    }
+
+    @Test
+    public void playCard_whenWildCardColorNotChosen_thenThrow() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        Card card = new Card(null, Symbol.WILDCARD);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+        User u = new User();
+        u.setId(1l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        assertThrows(CardColorNotChoosenException.class, () -> gameService.playCard(gameId, u, card,null, false));
+
+    }
+
+    @Test
+    public void playCard_whenExtremeHitPlayed_ColorIsSetAndVictimHasDrawnCards() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.EXTREME_HIT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+        Hand hand2 = new Hand();
+
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+        Mockito.when(random.nextInt(12)).thenReturn(1);
+
+        gameService.playCard(gameId, u, card,u2, false);
+
+        Card topMostCard = d.getTopmostCard();
+        assertEquals(card.getColor(), topMostCard.getColor(), "Color not correct");
+        assertEquals(card.getSymbol(), topMostCard.getSymbol(), "Symbol not correct");
+        assertEquals(1, p2.getHand().getCardCount());
+    }
+
+    @Test
+    public void playCard_whenExtremeHitPlayedButNoColor_thenThrow() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        Deck deck = new Deck();
+        Card card = new Card(null, Symbol.EXTREME_HIT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+        Hand hand2 = new Hand();
+
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        assertThrows(CardColorNotChoosenException.class, () -> gameService.playCard(gameId, u, card, u2, false));
+    }
+
+    @Test
+    public void playCard_whenExtremeHitPlayedButInvalidVictim_thenThrow() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        Deck deck = new Deck();
+        Card card = new Card(null, Symbol.EXTREME_HIT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+        Hand hand2 = new Hand();
+
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        assertThrows(CardColorNotChoosenException.class, () -> gameService.playCard(gameId, u, card, null, false));
+    }
 }

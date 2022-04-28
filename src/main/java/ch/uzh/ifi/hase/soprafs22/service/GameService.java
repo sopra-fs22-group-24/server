@@ -16,6 +16,7 @@ import ch.uzh.ifi.hase.soprafs22.utils.Globals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,12 +33,14 @@ public class GameService {
     private final GameRepository gameRepository;
     private final MessageService messageService;
     private final LobbyService lobbyService;
+    private final Random random;
 
     @Autowired
-    public GameService(GameRepository gameRepository, MessageService messageService, LobbyService lobbyService) {
+    public GameService(GameRepository gameRepository, MessageService messageService, LobbyService lobbyService, @Value("#{new java.util.Random()}") Random random) {
         this.gameRepository = gameRepository;
         this.messageService = messageService;
         this.lobbyService = lobbyService;
+        this.random = random;
     }
 
 
@@ -140,6 +143,9 @@ public class GameService {
             game.getDiscardPile().discardCard(card);
             //choosen Player draws
             Player victim = game.getPlayerFromUser(otherUser);
+            if(victim == null) {
+                throw new PlayerNotInGameException();
+            }
             List<CardDTO> cardDTOS = playerDrawsCard(game, victim);
             //send drawed cards to player
             messageService.sendToUser(victim.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTOS);
@@ -350,9 +356,8 @@ public class GameService {
 
         int max = Globals.maxDrawCount();
         int min = Globals.minDrawCount();
-        Random r = new Random();
         //int randomCardAmount = (int) ((Math.random() * (max - min)) + min);
-        int randomCardAmount = r.nextInt(max);
+        int randomCardAmount = random.nextInt(max);
 
         List<CardDTO> cardDTOS = new ArrayList<>();
         for(int i=0; i< randomCardAmount;i++) {
@@ -402,6 +407,7 @@ public class GameService {
         List<CardDTO> cardDTO = playerDrawsCard(game, calledOutPlayer);
         cardDTO.addAll(playerDrawsCard(game, calledOutPlayer));
 
+        gameRepository.saveAndFlush(game);
         informPlayers_nrOfCardsInHandPlayerX(calledOutPlayer, game);
 
         CalledOutDTO calledOutDTO = new CalledOutDTO();
