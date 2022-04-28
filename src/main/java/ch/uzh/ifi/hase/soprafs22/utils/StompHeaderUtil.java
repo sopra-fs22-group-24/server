@@ -10,7 +10,6 @@ public class StompHeaderUtil {
 
     public static String getNativeHeaderField(StompHeaderAccessor accessor, String fieldName) {
         GenericMessage<?> generic = (GenericMessage<?>) accessor.getHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER);
-        GenericMessage<?> generic2 = (GenericMessage<?>) accessor.getNativeHeader("token");
         if (generic != null) {
             SimpMessageHeaderAccessor nativeAccessor = SimpMessageHeaderAccessor.wrap(generic);
             List<String> value = nativeAccessor.getNativeHeader(fieldName);

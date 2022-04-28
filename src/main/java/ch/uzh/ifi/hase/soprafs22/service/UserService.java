@@ -61,7 +61,7 @@ public class UserService {
     //check login and login / else error
     public User login(User userInput) {
         //get saved user from provided username
-        User savedUser = userRepository.findByUsername(userInput.getUsername());//findSpecificUserByName(userInput.getUsername());
+        User savedUser = userRepository.findByUsername(userInput.getUsername());
         //check if useranme exists
         if(savedUser == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid Login Credentials");
@@ -146,8 +146,8 @@ public class UserService {
         String token = StompHeaderUtil.getNativeHeaderField(accessor, "token");
         return authenticateUser(token);
 
-    }*/
-
+    }
+*/
 
 
 

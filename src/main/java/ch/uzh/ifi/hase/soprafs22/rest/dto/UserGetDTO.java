@@ -45,5 +45,5 @@ public class UserGetDTO {
 
     public int getScore() { return score; }
 
-    public void setScore(int Points) { this.score = this.score + Points; }
+    public void setScore(int points) { this.score = this.score + points; }
 }

@@ -32,7 +32,7 @@ public class HandshakeHandler extends DefaultHandshakeHandler {
                                       Map<String, Object> attributes) {
         // Generate principal with UUID as name
         StompPrincipal principal = new StompPrincipal(UUID.randomUUID().toString());
-        System.out.println(principal.getName());
+
         return principal;
     }
 

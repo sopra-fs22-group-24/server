@@ -13,13 +13,9 @@ import java.util.Map;
 @Component
 public class HandshakeInterceptor extends HttpSessionHandshakeInterceptor {
 
-    private UserService userService;
-    private LobbyService lobbyService;
 
-    HandshakeInterceptor(UserService userService, LobbyService lobbyService) {
-        this.userService = userService;
-        this.lobbyService = lobbyService;
-    }
+
+    HandshakeInterceptor() {}
     @Override
     public boolean beforeHandshake(ServerHttpRequest request,
                                    ServerHttpResponse response,

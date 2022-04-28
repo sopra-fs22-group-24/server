@@ -59,9 +59,6 @@ public class Lobby {
     }
 
     public void addUser(User user) {
-        if(players == null) {
-            players = new Vector<User>();
-        }
         players.add(user);
     }
 

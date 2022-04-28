@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository("cardRepository")
 public interface CardRepository extends JpaRepository<Card, Long> {
-    public Card findById(long Id);
+    public Card findById(long id);
 
 
 

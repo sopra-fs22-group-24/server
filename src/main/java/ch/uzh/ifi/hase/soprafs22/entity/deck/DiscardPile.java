@@ -28,11 +28,11 @@ public class DiscardPile implements Serializable {
     }
 
     public Vector<Card >emptyDiscardPileExceptTopMostCard(){
-        Card TopMostCard = getTopmostCard();
+        Card topMostCard = getTopmostCard();
         discardPile.remove(discardPile.size()-1);
         Vector<Card> cardsToReturn = discardPile;
         discardPile = new Vector<>();
-        discardCard(TopMostCard);
+        discardCard(topMostCard);
         return cardsToReturn;
     }
     public void discardCard(Card card) {

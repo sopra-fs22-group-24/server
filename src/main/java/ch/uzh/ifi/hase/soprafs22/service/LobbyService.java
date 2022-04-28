@@ -21,7 +21,7 @@ import java.util.List;
 @Service
 @Transactional
 public class LobbyService {
-    private final Logger log = LoggerFactory.getLogger(UserService.class);
+    private final Logger log = LoggerFactory.getLogger(LobbyService.class);
 
     private final LobbyRepository lobbyRepository;
     private final MessageService messageService;
@@ -83,7 +83,7 @@ public class LobbyService {
         }
         lobby.removeUser(user);
 
-        if(lobby.getPlayers().size() == 0) {
+        if(lobby.getPlayers().isEmpty()) {
             lobbyRepository.delete(lobby);
 
         } else {

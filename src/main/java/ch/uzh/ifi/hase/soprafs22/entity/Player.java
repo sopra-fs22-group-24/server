@@ -17,6 +17,10 @@ public class Player implements Serializable {
 
     @Column()
     Hand hand;
+
+    @Column
+    boolean hasSaidUno;
+
     public User getUser() {
         return user;
     }
@@ -32,4 +36,14 @@ public class Player implements Serializable {
     public void setHand(Hand hand) {
         this.hand = hand;
     }
+
+    public void setHasSaidUno(boolean hasSaidUno) {
+        this.hasSaidUno = hasSaidUno;
+    }
+
+    public boolean isHasSaidUno() {
+        return hasSaidUno;
+    }
+
+
 }

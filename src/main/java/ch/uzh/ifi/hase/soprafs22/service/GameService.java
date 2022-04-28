@@ -8,6 +8,7 @@ import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.UserNotLobbyAdminException;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.*;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.CalledOutDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.CardDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.NCardsDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
@@ -20,12 +21,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Vector;
 
 @Service
 @Transactional
 public class GameService {
-    private final Logger log = LoggerFactory.getLogger(UserService.class);
+    private final Logger log = LoggerFactory.getLogger(GameService.class);
 
     private final GameRepository gameRepository;
     private final MessageService messageService;
@@ -97,17 +99,19 @@ public class GameService {
         //check player has card in hand he wants to play
         if(!hasCardInHand(player, card)) {
             throw new CardNotInHandException();
-            //messageService.sendErrorToUser(user.getPrincipalName(), "CardNotInHand");
         }
         //check card can be played
         if(!cardCanBePlayed(game.getDiscardPile(),card)) {
             throw new CardNotPlayableException();
-            //messageService.sendErrorToUser(user.getPrincipalName(), "CardCanNotBePlayed");
         }
         // handle uno
-        if(uno==true){
-            checkUnoCanBeCalled(player);
-            game.setUnoIsCalled(true);
+        // reset uno
+        player.setHasSaidUno(false);
+        //set uno if applicable
+        if(uno){
+            if(checkUnoCanBeCalled(player)) {
+                player.setHasSaidUno(true);
+            }
         }
 
         if(card.getSymbol() == Symbol.WILDCARD) {
@@ -118,7 +122,6 @@ public class GameService {
             // is already set in Attribute color in client but check if not null
             if(card.getColor()==null){
                 throw new CardColorNotChoosenException();
-                //messageService.sendErrorToUser(user.getPrincipalName(), "CardColorNotChoosen");
 
             }
             player.getHand().removeCard(card);
@@ -130,7 +133,6 @@ public class GameService {
         } else if (card.getSymbol() == Symbol.EXTREME_HIT) {
             if(card.getColor()==null){
                 throw new CardColorNotChoosenException();
-                //messageService.sendErrorToUser(user.getPrincipalName(), "CardColorNotChoosen");
             }
             //remove card from hand
             player.getHand().removeCard(card);
@@ -272,10 +274,7 @@ public class GameService {
     }
 
     public boolean hasCardInHand(Player player, Card card) {
-        if(player.getHand().containsCard(card)) {
-            return true;
-        }
-        return false;
+        return player.getHand().containsCard(card);
     }
     public boolean checkUnoCanBeCalled(Player player){
         return player.getHand().getCardCount()==2;
@@ -304,7 +303,6 @@ public class GameService {
             NCardsDTO nCardsDTO = new NCardsDTO();
             nCardsDTO.setUsername(player.getUser().getUsername());
             nCardsDTO.setnCards(hand.getCardCount());
-            // NCardsDTO nCardsDTO = DTOMapperImpl.INSTANCE.convertEntityToNCardsDTO(player.getUser(),hand.getCardCount());
             messageService.sendToGame(gameId, "playerHasNCards", nCardsDTO);
 
             //send cards to specific player
@@ -352,7 +350,9 @@ public class GameService {
 
         int max = Globals.maxDrawCount();
         int min = Globals.minDrawCount();
-        int randomCardAmount = (int) ((Math.random() * (max - min)) + min);
+        Random r = new Random();
+        //int randomCardAmount = (int) ((Math.random() * (max - min)) + min);
+        int randomCardAmount = r.nextInt(max);
 
         List<CardDTO> cardDTOS = new ArrayList<>();
         for(int i=0; i< randomCardAmount;i++) {
@@ -390,6 +390,25 @@ public class GameService {
     }
 
     public void callOutPlayer(long gameId, User user, User calledOutUser) {
-        return;
+        Game game = gameRepository.findByGameId(gameId);
+        Player player = authenticateUser(user, game);
+        Player calledOutPlayer = authenticateUser(calledOutUser, game);
+
+        //check if called out player has one card and not said uno, else throw
+        if(calledOutPlayer.getHand().getCardCount() != 1 || calledOutPlayer.isHasSaidUno()) {
+            throw new InvalidCallOutException();
+        }
+        //called out player has to draw twice
+        List<CardDTO> cardDTO = playerDrawsCard(game, calledOutPlayer);
+        cardDTO.addAll(playerDrawsCard(game, calledOutPlayer));
+
+        informPlayers_nrOfCardsInHandPlayerX(calledOutPlayer, game);
+
+        CalledOutDTO calledOutDTO = new CalledOutDTO();
+        calledOutDTO.setCallee(player.getUser().getUsername());
+        calledOutDTO.setCalledOutPlayer(calledOutPlayer.getUser().getUsername());
+        messageService.sendToGame(gameId,"calledOut", calledOutDTO);
+        messageService.sendToUser(calledOutPlayer.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTO);
+
     }
 }
