@@ -3,7 +3,6 @@ package ch.uzh.ifi.hase.soprafs22.entity.deck;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 import java.io.Serializable;
 
 @Entity

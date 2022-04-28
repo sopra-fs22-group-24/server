@@ -167,4 +167,5 @@ public class UserService {
         userRepository.flush();
     }
 
+    public User getUserByUsername(String username) {return userRepository.findByUsername(username);}
 }

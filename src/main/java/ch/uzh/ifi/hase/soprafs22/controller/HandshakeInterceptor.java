@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
-import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.service.LobbyService;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.springframework.http.server.ServerHttpRequest;
@@ -31,7 +30,6 @@ public class HandshakeInterceptor extends HttpSessionHandshakeInterceptor {
         System.out.println(response);
         System.out.println(wsHandler);
         System.out.println(attributes);
-        //User user = userService.authenticateUser(token);
 
         return true;
     }

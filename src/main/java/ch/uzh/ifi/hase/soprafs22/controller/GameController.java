@@ -18,23 +18,17 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
-import java.util.ArrayList;
-
-
 @Controller
 public class GameController {
-    private final Logger log = LoggerFactory.getLogger(UserService.class);
+    private final Logger log = LoggerFactory.getLogger(GameController.class);
 
-    private final LobbyService lobbyService;
     private final UserService userService;
     private final GameService gameService;
     private final MessageService messageService;
-    @Autowired
-    private SimpMessagingTemplate simpMessage;
 
-    GameController(LobbyService lobbyService, UserService userService, GameService gameService, MessageService messageService)
+
+    GameController(UserService userService, GameService gameService, MessageService messageService)
     {
-        this.lobbyService = lobbyService;
         this.userService = userService;
         this.gameService = gameService;
         this.messageService = messageService;
@@ -54,7 +48,6 @@ public class GameController {
             GameIdDTO gameDto = DTOMapper.INSTANCE.convertGameToGameIdDTO(game);
             messageService.sendToLobby(lobbyId, "startGame",gameDto);
             log.info("Successfully created game {} for lobby {} by user {}", game.getGameId(), lobbyId, user.getUsername());
-            //simpMessage.convertAndSend(String.format("/lobby/%d/messages", lobbyId), gameDto);
         } catch (GameException e) {
             log.info("Error in /game: {} ",e.getClass().getSimpleName());
             messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
@@ -64,14 +57,22 @@ public class GameController {
 
     }
     // TODO EndPoint Complain if it works player who called uno draws automatically
-
+    @MessageMapping("/game/{gameId}/callOut")
+    public void callOut(StompHeaderAccessor accessor, UserPostDTO dto, @DestinationVariable("gameId") long gameId) {
+        User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+        User calledOutUser = userService.getUserByUsername(dto.getUsername());
+        try {
+            gameService.callOutPlayer(gameId, user, calledOutUser );
+        } catch (GameException e) {
+            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+        }
+    }
 
     // TODO additionaly take optional UNO called argument ( then it will be possible to complain until next move is over)
     // TODO optional PlayerArgument In playCard for extremeHitcard card
     @MessageMapping("/game/{gameId}/playCard")
-//    public void playCard(StompHeaderAccessor accessor, CardDTO cardDTO,UserPostDTO otherUserDTO, UNODTO unoDTO, @DestinationVariable("gameId") long gameId) {
     public void playCard(StompHeaderAccessor accessor, PlayCardDTO playCardDTO, @DestinationVariable("gameId") long gameId) {
-        System.out.println("hello");
+
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
         Card card  = playCardDTO.getCard();
         User otherUser = playCardDTO.getUser();

@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
-import ch.uzh.ifi.hase.soprafs22.entity.deck.Card;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.Deck;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.DiscardPile;
 
@@ -35,10 +34,7 @@ public class Game implements Serializable  {
 
     @Column()
     boolean reverse=false;
-    /*
-    @Column(nullable = false)
-    private Vector<User> players;
-    */
+
     public boolean isUnoIsCalled() {
         return unoIsCalled;
     }
@@ -121,7 +117,7 @@ public class Game implements Serializable  {
 
     public boolean checkPlayerTurn(Player player) {
         Player turnPlayer = players.get(turnIndex);
-        return turnPlayer.getUser().getId() == player.getUser().getId();
+        return turnPlayer.getUser().getId().equals( player.getUser().getId());
     }
 
     public Player getPlayerTurn() {

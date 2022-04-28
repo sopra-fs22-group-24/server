@@ -1,46 +1,30 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 import ch.uzh.ifi.hase.soprafs22.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
-import ch.uzh.ifi.hase.soprafs22.entity.deck.Card;
-import ch.uzh.ifi.hase.soprafs22.entity.deck.Color;
-import ch.uzh.ifi.hase.soprafs22.entity.deck.Symbol;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.GameException;
-import ch.uzh.ifi.hase.soprafs22.messagingObjects.Message;
-import ch.uzh.ifi.hase.soprafs22.messagingObjects.Response;
-import ch.uzh.ifi.hase.soprafs22.messagingObjects.Hello;
-import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
-import ch.uzh.ifi.hase.soprafs22.repository.LobbyRepository;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.CardDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.LobbyGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.LobbyPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
-import ch.uzh.ifi.hase.soprafs22.service.GameService;
 import ch.uzh.ifi.hase.soprafs22.service.LobbyService;
 import ch.uzh.ifi.hase.soprafs22.service.MessageService;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.HtmlUtils;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
+
 
 @Controller
 public class LobbyController {
-    private final Logger log = LoggerFactory.getLogger(UserService.class);
+    private final Logger log = LoggerFactory.getLogger(LobbyController.class);
     private final LobbyService lobbyService;
     private final UserService userService;
     private final MessageService messageService;
@@ -99,7 +83,6 @@ public class LobbyController {
         //Inform lobby
 
         messageService.sendToLobby(lobby.getLobbyId(), "userJoined",userDTO);
-        //simpMessage.convertAndSendToUser(user.getPrincipalName(), "/queue/messages", returnDto);
         log.info("/joinLobby. User {} joined lobby id {}", user.getUsername(),lobby.getLobbyId());
 
     }
@@ -109,18 +92,11 @@ public class LobbyController {
 
         // authorize User
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
-        /*
-        if(user == null) {
-            Message m = new Message("Error: User doesn't exist");
-            simpMessage.convertAndSendToUser(accessor.getUser().getName(), "/queue/messages", m);
 
-        }
-        */
 
         Lobby lobby = lobbyService.createLobby(user);
         LobbyPostDTO dto = DTOMapper.INSTANCE.convertEntityToLobbyPostDTO(lobby);
         messageService.sendToUser(user.getPrincipalName(), "joinLobby", dto);
-        //simpMessage.convertAndSendToUser(accessor.getUser().getName(), "/queue/messages", dto );
         log.info("created Lobby {} for {}",lobby.getLobbyId(),user.getUsername());
     }
 

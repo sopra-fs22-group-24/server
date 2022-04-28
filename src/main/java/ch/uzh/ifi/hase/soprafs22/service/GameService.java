@@ -388,4 +388,8 @@ public class GameService {
         messageService.sendToGame(gameId, "playerTurn", DTOMapper.INSTANCE.convertEntityToUserGetDTO(playerTurn.getUser()));
 
     }
+
+    public void callOutPlayer(long gameId, User user, User calledOutUser) {
+        return;
+    }
 }

@@ -30,7 +30,7 @@ public class Lobby {
     }
 
     public void setLobbyId(Long lobbyId) {
-        lobbyId = lobbyId;
+        this.lobbyId = lobbyId;
     }
 
     public Vector<User> getPlayers() {

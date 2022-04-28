@@ -11,7 +11,7 @@ public class Deck implements Serializable {
 
     public Deck() {
         // TODO discard all cards 4 each color once
-        this.deck = new Vector<Card>();
+        this.deck = new Vector<>();
         // initialize deck
         for(Color color: Color.values() ) {
             for(Symbol symbol: Symbol.values()) {
@@ -35,8 +35,8 @@ public class Deck implements Serializable {
     returns the last card (index wise) from the deck and removes it from the deck
      */
     public Card drawCard() {
-        Card card = deck.remove(deck.size()-1);
-        return card;
+        return deck.remove(deck.size()-1);
+        
     }
     //to avoid indexOutOfBounds when deck is empty
     public boolean deckIsEmpty(){
