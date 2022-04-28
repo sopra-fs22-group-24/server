@@ -63,7 +63,11 @@ public class GameController {
 
 
     }
+    // TODO EndPoint Complain if it works player who called uno draws automatically
 
+
+    // TODO additionaly take optional UNO called argument ( then it will be possible to complain until next move is over)
+    // TODO optional PlayerArgument In playCard for extremeHitcard card
     @MessageMapping("/game/{gameId}/playCard")
 //    public void playCard(StompHeaderAccessor accessor, CardDTO cardDTO,UserPostDTO otherUserDTO, UNODTO unoDTO, @DestinationVariable("gameId") long gameId) {
     public void playCard(StompHeaderAccessor accessor, PlayCardDTO playCardDTO, @DestinationVariable("gameId") long gameId) {

@@ -10,7 +10,6 @@ import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.*;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.CardDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.NCardsDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.utils.Globals;
 import org.slf4j.Logger;
@@ -84,7 +83,6 @@ public class GameService {
 
     public void playCard(long gameId, User user, Card card, User otherUser, boolean uno) {
         // TODO check out if there are python like decorators for error handling
-        // TODO persist changes in game
         //check game
         Game game = getGameFromGameId(gameId);
 
@@ -96,7 +94,7 @@ public class GameService {
         if(!playersTurn(player, game)) {
             throw new NotPlayerTurnException();
         }
-        //check player has card in hand
+        //check player has card in hand he wants to play
         if(!hasCardInHand(player, card)) {
             throw new CardNotInHandException();
             //messageService.sendErrorToUser(user.getPrincipalName(), "CardNotInHand");
@@ -106,9 +104,14 @@ public class GameService {
             throw new CardNotPlayableException();
             //messageService.sendErrorToUser(user.getPrincipalName(), "CardCanNotBePlayed");
         }
+        // handle uno
+        if(uno==true){
+            checkUnoCanBeCalled(player);
+            game.setUnoIsCalled(true);
+        }
 
         if(card.getSymbol() == Symbol.WILDCARD) {
-            // input wildcard + color color taken from card attribute
+            // input wildcard + color taken from card attribute
             // topmost card color set to choosen color
             //remove card from players hand
             //set choosen color
@@ -125,28 +128,49 @@ public class GameService {
 
 
         } else if (card.getSymbol() == Symbol.EXTREME_HIT) {
-            //TODO handle Extreme_hit
-            // input extremehit card color and player
-            // set topmost card to color
-            // choosen player has to draw once
             if(card.getColor()==null){
                 throw new CardColorNotChoosenException();
                 //messageService.sendErrorToUser(user.getPrincipalName(), "CardColorNotChoosen");
-
             }
+            //remove card from hand
             player.getHand().removeCard(card);
             //set card on Top
             game.getDiscardPile().discardCard(card);
+            //choosen Player draws
             Player victim = game.getPlayerFromUser(otherUser);
             List<CardDTO> cardDTOS = playerDrawsCard(game, victim);
+            //send drawed cards to player
             messageService.sendToUser(victim.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTOS);
 
             game.nextTurn();
         } else if(card.getSymbol() == Symbol.DISCARD_ALL) {
-            //TODO handle discard all
-            // input discard all card + color
+            // TODO input discard all card 4 cards exists each color once
             // discards all cards of that color from user
-            // discard all doesnt work if it leads to instant win??
+            // discard all doesnt work if it leads to instant win
+            //remove discard all Card can be played anyways and Set it on discardpile
+            player.getHand().removeCard(card);
+            game.getDiscardPile().discardCard(card);
+            //check if it leads to instantwin witout possible unocall
+            int numberOfCards=0;
+            int numberOfCardsToDiscard =0;
+            for (Card cardToCount : player.getHand().getCards()
+                    ) {
+                ++numberOfCards;
+                if (cardToCount.getColor()==card.getColor()){
+                    ++numberOfCardsToDiscard;
+                }
+
+            }
+            int cardsLeftInHand = numberOfCards-numberOfCardsToDiscard;
+            //if after discarding discardAllCard all other cards in Hand are discarded it is not allowed because it grants instantwin
+            if (cardsLeftInHand <= 0) {
+                for (Card cardToDiscard:player.getHand().getCards()
+                     ) {
+                    player.getHand().removeCard(cardToDiscard);
+                    game.getDiscardPile().discardCard(cardToDiscard);
+                }
+            }
+            game.nextTurn();
         } else if (card.getSymbol() == Symbol.SKIP) {
             // remove card & set it on top
             player.getHand().removeCard(card);
@@ -155,11 +179,10 @@ public class GameService {
             game.nextTurn();
             game.nextTurn();
 
-            // TODO call inform functions ( maybe we can do it at the end because all moves need similar updates
         } else if (card.getSymbol() == Symbol.HIT_2) {
-            //TODO handle Hit_2
-            // next player has to draw 2 times before next players turn
+            //TODO handle Hit_2 case when next player wants to HIT2 aswell
 
+            //next player has to draw 2 times before next players turn
             // find next player
             Player victim = game.getNextPlayer();
             // Let them draw twice
@@ -189,9 +212,11 @@ public class GameService {
         } else {
             handleNormalCard(game, player, card);
         }
-        // TODO persist changes to game from move
+
+
+        // persist changes to game from move
         gameRepository.saveAndFlush(game);
-        // TODO maybe update the player/players State here because always topmost card & nrOfcardPlayerx and next turn called
+        //update the player/players State here because always topmost card & nrOfcardPlayerx and next turn called
         informPlayers_TopMostCard(game,card);
         informPlayers_nrOfCardsInHandPlayerX(player, game);
         informPlayerToTurn(game);
@@ -214,8 +239,7 @@ public class GameService {
 
     private boolean cardCanBePlayed(DiscardPile discardPile, Card card) {
         if(card.getSymbol() == Symbol.WILDCARD ||
-                card.getSymbol() == Symbol.EXTREME_HIT ||
-                card.getSymbol() == Symbol.DISCARD_ALL) {
+                card.getSymbol() == Symbol.EXTREME_HIT) {
             return true;
         }
 
@@ -253,8 +277,8 @@ public class GameService {
         }
         return false;
     }
-    public boolean checkUnoApplicable(Player player){
-        return player.getHand().getCardCount()==1;
+    public boolean checkUnoCanBeCalled(Player player){
+        return player.getHand().getCardCount()==2;
     }
     // TODO remember if uno was called by the last player whos turn it was
     public boolean checkIfCalloutApplicable(){

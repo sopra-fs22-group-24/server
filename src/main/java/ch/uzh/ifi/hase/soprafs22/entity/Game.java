@@ -31,11 +31,21 @@ public class Game implements Serializable  {
     int turnIndex;
 
     @Column()
+    boolean unoIsCalled=false;
+
+    @Column()
     boolean reverse=false;
     /*
     @Column(nullable = false)
     private Vector<User> players;
     */
+    public boolean isUnoIsCalled() {
+        return unoIsCalled;
+    }
+
+    public void setUnoIsCalled(boolean unoIsCalled) {
+        this.unoIsCalled = unoIsCalled;
+    }
     public Game() {
         this.players = new Vector<>();
     }
