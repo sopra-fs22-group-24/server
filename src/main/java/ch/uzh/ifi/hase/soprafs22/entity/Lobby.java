@@ -51,7 +51,7 @@ public class Lobby {
 
     public boolean containsUser(User user) {
         for(User u: players) {
-            if(u.equals(user)) {
+            if(u.getId().equals(user.getId())) {
                 return true;
             }
         }
@@ -65,8 +65,17 @@ public class Lobby {
         players.add(user);
     }
 
-    public void removeUser(User user) {
-        players.remove(user);
+    public void removeUser(User target) {
+        User toDelete = null;
+        for(User user : players) {
+            if(user.getId().equals(target.getId())) {
+                toDelete = user;
+                break;
+
+            }
+        }
+        players.remove(toDelete);
+
     }
 
     public boolean userIsAdmin(User user) {

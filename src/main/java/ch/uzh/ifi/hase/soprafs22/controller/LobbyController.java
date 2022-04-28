@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.Card;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.Color;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.Symbol;
+import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.GameException;
 import ch.uzh.ifi.hase.soprafs22.messagingObjects.Message;
 import ch.uzh.ifi.hase.soprafs22.messagingObjects.Response;
 import ch.uzh.ifi.hase.soprafs22.messagingObjects.Hello;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -77,12 +79,17 @@ public class LobbyController {
 
     }
 
-    @MessageMapping("/joinLobby")
-    public void handle(StompHeaderAccessor accessor, LobbyPostDTO dto) {
+    @MessageMapping("/lobby/{lobbyId}/joinLobby")
+    public void handle(StompHeaderAccessor accessor, @DestinationVariable("lobbyId") long lobbyId) {
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
-        log.info("/joinLobby. User {} wants to join lobby id {}", user.getUsername(),dto.getLobbyId());
-
-        Lobby lobby = lobbyService.joinLobby(user, dto.getLobbyId());
+        log.info("/joinLobby. User {} wants to join lobby id {}", user.getUsername(),lobbyId);
+        Lobby lobby;
+        try {
+            lobby = lobbyService.joinLobby(user, lobbyId);
+        } catch (GameException e) {
+            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+            return;
+        }
         LobbyPostDTO returnDto = DTOMapper.INSTANCE.convertEntityToLobbyPostDTO(lobby);
 
         //Inform user
@@ -117,6 +124,15 @@ public class LobbyController {
         log.info("created Lobby {} for {}",lobby.getLobbyId(),user.getUsername());
     }
 
+    @MessageMapping("/lobby/{lobbyId}/leaveLobby")
+    public void leaveLobby(StompHeaderAccessor accessor, @DestinationVariable("lobbyId") long lobbyId) {
+        User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+        try {
+            lobbyService.leaveLobby(lobbyId, user);
+        } catch (GameException e) {
+            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+        }
 
+    }
 
 }
