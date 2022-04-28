@@ -565,4 +565,39 @@ public class GameServiceTest {
 
         assertThrows(CardColorNotChoosenException.class, () -> gameService.playCard(gameId, u, card, null, false));
     }
+
+    @Test
+    public void getGameFromGameId_Success(){}
+
+    @Test
+    public void getGameFromGameId_ThrowsExeption_GameNotExists(){}
+
+    @Test
+    public void hasCardInHand_Positive(){}
+
+    @Test
+    public void hasCardInHand_Negative(){}
+
+    @Test
+    public void checkUnoCanBeCalled_Positive(){}
+
+    @Test
+    public void checkUnoCanBeCalled_Negative(){}
+    @Test
+    public void initialize_Sucess(){}
+
+    @Test
+    public void drawCard_sucess(){}
+
+    @Test
+    public void drawCard_Throws_gameNotExistsException(){}
+
+    @Test
+    public void drawCard_Throws_playerInGameException(){}
+
+    @Test
+    public void callOutPlayer_Positive(){}
+
+    @Test
+    public void callOutPlayer_Negative(){}
 }
