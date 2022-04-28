@@ -8,6 +8,21 @@ public class DiscardPile implements Serializable {
 
     Vector<Card> discardPile;
 
+    //counts the stack of HIT2 Cards the next player has to draw
+    int Hit2 = 0;
+
+    public int getHit2() {
+        return Hit2;
+    }
+
+    public void increaseHit2(){
+        Hit2 ++;
+    }
+
+    public void resetHit2 (){
+        Hit2 = 0;
+    }
+
     public DiscardPile() {
         discardPile = new Vector<>();
     }
