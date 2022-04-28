@@ -173,7 +173,6 @@ class LobbyControllerIntegrationTest {
         BlockingQueue<UserGetDTO> blockingQueue3 = new LinkedBlockingDeque<>();
         BlockingQueue<UserGetDTO> blockingQueue4 = new LinkedBlockingDeque<>();
 
-        //webSocketStompClient.setMessageConverter(new StringMessageConverter());
 
         String token1 = "token3";
 
@@ -258,7 +257,7 @@ class LobbyControllerIntegrationTest {
         });
         blockingQueue.poll(1, SECONDS);
 
-        session2.send("/app/joinLobby", dto);
+        session2.send("/app/lobby/"+dto.getLobbyId()+"/joinLobby", dto);
         LobbyPostDTO dto2 = blockingQueue2.poll(1, SECONDS);
         UserGetDTO userDto = blockingQueue3.poll(1,SECONDS);
         UserGetDTO userDto2 = blockingQueue4.poll(1, SECONDS);
