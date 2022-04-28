@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.persistence.Lob;
+import java.util.Random;
 import java.util.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +31,9 @@ public class GameServiceTest {
 
     @Mock
     MessageService messageService;
+
+    @Mock
+    Random random;
 
     @Mock
     LobbyService lobbyService;
@@ -203,6 +207,55 @@ public class GameServiceTest {
         assertTrue(game.checkPlayerTurn(player2), "Turn order not increased");
     }
 
+    @Test
+    public void startGame_whenPlayerNotAdmin_thenThrowException() {
+        //Atm the user with index 0 in the lobby is the admin
+
+        User u1 = new User();
+        User u2 = new User();
+
+        u1.setId(1l);
+        u2.setId(2l);
+
+        long lobbyId = 1;
+        Lobby lobby = new Lobby();
+        lobby.setLobbyId(lobbyId);
+        lobby.addUser(u1);
+        lobby.addUser(u2);
+
+
+        Mockito.when(lobbyService.findByLobbyId(lobbyId)).thenReturn(lobby);
+
+        assertThrows(UserNotLobbyAdminException.class,() -> gameService.createGame(lobbyId,u2));
+
+    }
+
+    @Test
+    public void startGame_whenSuccessful_thenEachPlayerInGameAndHasHand() {
+        //Atm the user with index 0 in the lobby is the admin
+
+        User u1 = new User();
+        User u2 = new User();
+
+        u1.setId(1l);
+        u2.setId(2l);
+
+        long lobbyId = 1;
+        Lobby lobby = new Lobby();
+        lobby.setLobbyId(lobbyId);
+        lobby.addUser(u1);
+        lobby.addUser(u2);
+
+
+        Mockito.when(lobbyService.findByLobbyId(lobbyId)).thenReturn(lobby);
+        Mockito.when(gameRepository.save(Mockito.any())).then(AdditionalAnswers.returnsFirstArg());
+        Game game = gameService.createGame(lobbyId,u1);
+        assertEquals(u1.getId(),game.getPlayers().get(0).getUser().getId());
+        assertEquals(u2.getId(),game.getPlayers().get(1).getUser().getId());
+        assertEquals(7, game.getPlayers().get(0).getHand().getCardCount());
+        assertEquals(7, game.getPlayers().get(1).getHand().getCardCount());
+
+    }
 
     @Test
     public void playCard_whenSkip_thenIncreaseTurnByTwo() {
@@ -311,7 +364,7 @@ public class GameServiceTest {
         Deck deck = new Deck();
         game.setDeck(deck);
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
-
+        Mockito.when(random.nextInt(12)).thenReturn(1);
         gameService.playCard(gameId, user1, card, null, false);
 
 
@@ -321,92 +374,195 @@ public class GameServiceTest {
         Card topMostCard = pile.getTopmostCard();
         assertEquals(topMostCard.getColor(), card.getColor(), "Color not the same");
         assertEquals(topMostCard.getSymbol(), card.getSymbol(), "Symbol not the same");
-        assertTrue(0 < player2.getHand().getCardCount(), "player 2 didn't draw");
+        assertEquals(2, player2.getHand().getCardCount(), "player 2 didn't draw");
 
     }
 
     @Test
-    public void startGame_whenPlayerNotAdmin_thenThrowException() {
-        //Atm the user with index 0 in the lobby is the admin
+    public void playCard_WhenWildcard_thenSetColorCorrectly() {
+        long gameId = 128l;
 
-        User u1 = new User();
+        DiscardPile d = new DiscardPile();
+        Card card = new Card(Color.BLUE, Symbol.WILDCARD);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+        User u = new User();
+        u.setId(1l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        gameService.playCard(gameId, u, card,null, false);
+
+        Card topMostCard = d.getTopmostCard();
+        assertEquals(card.getColor(),topMostCard.getColor());
+        assertEquals(card.getSymbol(),topMostCard.getSymbol());
+    }
+
+    @Test
+    public void playCard_whenWildCardColorNotChosen_thenThrow() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        Card card = new Card(null, Symbol.WILDCARD);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+        User u = new User();
+        u.setId(1l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        assertThrows(CardColorNotChoosenException.class, () -> gameService.playCard(gameId, u, card,null, false));
+
+    }
+
+    @Test
+    public void playCard_whenExtremeHitPlayed_ColorIsSetAndVictimHasDrawnCards() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.EXTREME_HIT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+        Hand hand2 = new Hand();
+
+        User u = new User();
+        u.setId(1l);
+
         User u2 = new User();
-
-        u1.setId(1l);
         u2.setId(2l);
 
-        long lobbyId = 1;
-        Lobby lobby = new Lobby();
-        lobby.setLobbyId(lobbyId);
-        lobby.addUser(u1);
-        lobby.addUser(u2);
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
 
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
 
-        Mockito.when(lobbyService.findByLobbyId(lobbyId)).thenReturn(lobby);
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
 
-        assertThrows(UserNotLobbyAdminException.class,() -> gameService.createGame(lobbyId,u2));
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
 
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+        Mockito.when(random.nextInt(12)).thenReturn(1);
+
+        gameService.playCard(gameId, u, card,u2, false);
+
+        Card topMostCard = d.getTopmostCard();
+        assertEquals(card.getColor(), topMostCard.getColor(), "Color not correct");
+        assertEquals(card.getSymbol(), topMostCard.getSymbol(), "Symbol not correct");
+        assertEquals(1, p2.getHand().getCardCount());
     }
 
     @Test
-    public void startGame_whenSuccessful_thenEachPlayerInGameAndHasHand() {
-        //Atm the user with index 0 in the lobby is the admin
+    public void playCard_whenExtremeHitPlayedButNoColor_thenThrow() {
+        long gameId = 128l;
 
-        User u1 = new User();
+        DiscardPile d = new DiscardPile();
+        Deck deck = new Deck();
+        Card card = new Card(null, Symbol.EXTREME_HIT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+        Hand hand2 = new Hand();
+
+        User u = new User();
+        u.setId(1l);
+
         User u2 = new User();
-
-        u1.setId(1l);
         u2.setId(2l);
 
-        long lobbyId = 1;
-        Lobby lobby = new Lobby();
-        lobby.setLobbyId(lobbyId);
-        lobby.addUser(u1);
-        lobby.addUser(u2);
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
 
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
 
-        Mockito.when(lobbyService.findByLobbyId(lobbyId)).thenReturn(lobby);
-        Mockito.when(gameRepository.save(Mockito.any())).then(AdditionalAnswers.returnsFirstArg());
-        Game game = gameService.createGame(lobbyId,u1);
-        assertEquals(u1.getId(),game.getPlayers().get(0).getUser().getId());
-        assertEquals(u2.getId(),game.getPlayers().get(1).getUser().getId());
-        assertEquals(7, game.getPlayers().get(0).getHand().getCardCount());
-        assertEquals(7, game.getPlayers().get(1).getHand().getCardCount());
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
 
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        assertThrows(CardColorNotChoosenException.class, () -> gameService.playCard(gameId, u, card, u2, false));
     }
 
     @Test
-    public void getGameFromGameId_Success(){}
+    public void playCard_whenExtremeHitPlayedButInvalidVictim_thenThrow() {
+        long gameId = 128l;
 
-    @Test
-    public void getGameFromGameId_ThrowsExeption_GameNotExists(){}
+        DiscardPile d = new DiscardPile();
+        Deck deck = new Deck();
+        Card card = new Card(null, Symbol.EXTREME_HIT);
+        Hand hand = new Hand();
+        hand.addCard(card);
 
-    @Test
-    public void hasCardInHand_Positive(){}
+        Hand hand2 = new Hand();
 
-    @Test
-    public void hasCardInHand_Negative(){}
+        User u = new User();
+        u.setId(1l);
 
-    @Test
-    public void checkUnoCanBeCalled_Positive(){}
+        User u2 = new User();
+        u2.setId(2l);
 
-    @Test
-    public void checkUnoCanBeCalled_Negative(){}
-    @Test
-    public void initialize_Sucess(){}
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
 
-    @Test
-    public void drawCard_sucess(){}
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
 
-    @Test
-    public void drawCard_Throws_gameNotExistsException(){}
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
 
-    @Test
-    public void drawCard_Throws_playerInGameException(){}
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
 
-    @Test
-    public void callOutPlayer_Positive(){}
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
 
-    @Test
-    public void callOutPlayer_Negative(){}
+        assertThrows(CardColorNotChoosenException.class, () -> gameService.playCard(gameId, u, card, null, false));
+    }
 }
