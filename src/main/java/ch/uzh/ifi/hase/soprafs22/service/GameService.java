@@ -142,8 +142,10 @@ public class GameService {
             //set card on Top
             game.getDiscardPile().discardCard(card);
             //choosen Player draws
-            Player victim = game.getPlayerFromUser(otherUser);
-            if(victim == null) {
+            Player victim;
+            try {
+                victim = game.getPlayerFromUser(otherUser);
+            } catch(NullPointerException e) {
                 throw new PlayerNotInGameException();
             }
             List<CardDTO> cardDTOS = playerDrawsCard(game, victim);
@@ -171,12 +173,21 @@ public class GameService {
             }
             int cardsLeftInHand = numberOfCards-numberOfCardsToDiscard;
             //if after discarding discardAllCard all other cards in Hand are discarded it is not allowed because it grants instantwin
-            if (cardsLeftInHand <= 0) {
-                for (Card cardToDiscard:player.getHand().getCards()
-                     ) {
-                    player.getHand().removeCard(cardToDiscard);
-                    game.getDiscardPile().discardCard(cardToDiscard);
+            List<Card> toDiscard = new ArrayList();
+
+            if (cardsLeftInHand > 0) {
+                for (Card cardToCheck : player.getHand().getCards()) {
+                    if (card.getColor() == cardToCheck.getColor()) {
+                        toDiscard.add(cardToCheck);
+                    }
                 }
+            }
+            else {
+                toDiscard.add(card);
+            }
+            for(Card cardToDiscard: toDiscard) {
+                player.getHand().removeCard(cardToDiscard);
+                game.getDiscardPile().discardCard(cardToDiscard);
             }
             game.nextTurn();
         } else if (card.getSymbol() == Symbol.SKIP) {

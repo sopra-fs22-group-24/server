@@ -531,7 +531,7 @@ public class GameServiceTest {
 
         DiscardPile d = new DiscardPile();
         Deck deck = new Deck();
-        Card card = new Card(null, Symbol.EXTREME_HIT);
+        Card card = new Card(Color.BLUE, Symbol.EXTREME_HIT);
         Hand hand = new Hand();
         hand.addCard(card);
 
@@ -563,9 +563,152 @@ public class GameServiceTest {
 
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
 
-        assertThrows(CardColorNotChoosenException.class, () -> gameService.playCard(gameId, u, card, null, false));
+        assertThrows(PlayerNotInGameException.class, () -> gameService.playCard(gameId, u, card, null, false));
+    }
+    @Test
+    public void playCard_whenDiscardAll_thenRemoveCardsOfSameColor() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.DISCARD_ALL);
+        Hand hand = new Hand();
+        hand.addCard(card);
+        hand.addCard(new Card(Color.BLUE, Symbol.EIGHT));
+        hand.addCard(new Card(Color.BLUE, Symbol.FOUR));
+        hand.addCard(new Card(Color.RED, Symbol.FOUR));
+
+        Hand hand2 = new Hand();
+
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        gameService.playCard(gameId, u, card, null, false);
+        assertEquals(1, p.getHand().getCardCount());
+
     }
 
+    @Test
+    public void playCard_whenDiscardAllWouldDiscardAll_thenOnlyRemoveDiscardAll() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.DISCARD_ALL);
+        Hand hand = new Hand();
+        hand.addCard(card);
+        hand.addCard(new Card(Color.BLUE, Symbol.EIGHT));
+        hand.addCard(new Card(Color.BLUE, Symbol.FOUR));
+
+        Hand hand2 = new Hand();
+
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        gameService.playCard(gameId, u, card, null, false);
+        assertEquals(2, p.getHand().getCardCount());
+
+    }
+
+    @Test
+    public void playCard_whenReverse_thenReverseGameTurn() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.REVERSE);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+
+        Hand hand2 = new Hand();
+        Hand hand3 = new Hand();
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        User u3 = new User();
+        u3.setId(3l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Player p3 = new Player();
+        p3.setUser(u3);
+        p3.setHand(hand3);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+        players.add(p3);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        gameService.playCard(gameId, u, card, null, false);
+        assertEquals(p3.getUser().getId(), game.getPlayerTurn().getUser().getId());
+    }
     @Test
     public void getGameFromGameId_Success(){}
 
