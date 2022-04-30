@@ -118,116 +118,18 @@ public class GameService {
         }
 
         if(card.getSymbol() == Symbol.WILDCARD) {
-            // input wildcard + color taken from card attribute
-            // topmost card color set to choosen color
-            //remove card from players hand
-            //set choosen color
-            // is already set in Attribute color in client but check if not null
-            if(card.getColor()==null){
-                throw new CardColorNotChoosenException();
-
-            }
-            player.getHand().removeCard(card);
-            //set card on Top
-            game.getDiscardPile().discardCard(card);
-            game.nextTurn();
-
-
+            handleWildcard(game, player,card);
         } else if (card.getSymbol() == Symbol.EXTREME_HIT) {
-            if(card.getColor()==null){
-                throw new CardColorNotChoosenException();
-            }
-            //remove card from hand
-            player.getHand().removeCard(card);
-            //set card on Top
-            game.getDiscardPile().discardCard(card);
-            //choosen Player draws
-            Player victim;
-            try {
-                victim = game.getPlayerFromUser(otherUser);
-            } catch(NullPointerException e) {
-                throw new PlayerNotInGameException();
-            }
-            List<CardDTO> cardDTOS = playerDrawsCard(game, victim);
-            //send drawed cards to player
-            messageService.sendToUser(victim.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTOS);
-
-            game.nextTurn();
+            handleExtremeHit(game, player, card, otherUser);
         } else if(card.getSymbol() == Symbol.DISCARD_ALL) {
-            // TODO input discard all card 4 cards exists each color once
-            // discards all cards of that color from user
-            // discard all doesnt work if it leads to instant win
-            //remove discard all Card can be played anyways and Set it on discardpile
-            player.getHand().removeCard(card);
-            game.getDiscardPile().discardCard(card);
-            //check if it leads to instantwin witout possible unocall
-            int numberOfCards=0;
-            int numberOfCardsToDiscard =0;
-            for (Card cardToCount : player.getHand().getCards()
-                    ) {
-                ++numberOfCards;
-                if (cardToCount.getColor()==card.getColor()){
-                    ++numberOfCardsToDiscard;
-                }
-
-            }
-            int cardsLeftInHand = numberOfCards-numberOfCardsToDiscard;
-            //if after discarding discardAllCard all other cards in Hand are discarded it is not allowed because it grants instantwin
-            List<Card> toDiscard = new ArrayList();
-
-            if (cardsLeftInHand > 0) {
-                for (Card cardToCheck : player.getHand().getCards()) {
-                    if (card.getColor() == cardToCheck.getColor()) {
-                        toDiscard.add(cardToCheck);
-                    }
-                }
-            }
-            else {
-                toDiscard.add(card);
-            }
-            for(Card cardToDiscard: toDiscard) {
-                player.getHand().removeCard(cardToDiscard);
-                game.getDiscardPile().discardCard(cardToDiscard);
-            }
-            game.nextTurn();
+            handleDiscardAll(game, player, card);
         } else if (card.getSymbol() == Symbol.SKIP) {
-            // remove card & set it on top
-            player.getHand().removeCard(card);
-            game.getDiscardPile().discardCard(card);
-            // skip next players turn
-            game.nextTurn();
-            game.nextTurn();
+            handleSkip(game, player, card);
 
         } else if (card.getSymbol() == Symbol.HIT_2) {
-            //TODO handle Hit_2 case when next player wants to HIT2 aswell
-
-            //next player has to draw 2 times before next players turn
-            // find next player
-            Player victim = game.getNextPlayer();
-            // Let them draw twice
-            List<CardDTO> cardDTOS1 = playerDrawsCard(game, victim);
-            List<CardDTO> cardDTOS2 = playerDrawsCard(game, victim);
-            cardDTOS1.addAll(cardDTOS2);
-            //remove card from player hand
-            player.getHand().removeCard(card);
-            //set card on Top
-            game.getDiscardPile().discardCard(card);
-            game.nextTurn();
-            // send drawn cards
-            messageService.sendToUser(victim.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTOS1);
-            game.nextTurn();
-            game.nextTurn();
+            handleHit2(game, player, card);
         } else if (card.getSymbol() == Symbol.REVERSE) {
-            // remove card from player hand
-            player.getHand().removeCard(card);
-
-            //place card in discard pile
-            game.getDiscardPile().discardCard(card);
-            //change turn direction
-            game.reverseTurndirection();
-            //increase turn
-            game.nextTurn();
-
+            handleReverse(game, player, card);
         } else {
             handleNormalCard(game, player, card);
         }
@@ -239,6 +141,125 @@ public class GameService {
         informPlayers_TopMostCard(game,card);
         informPlayers_nrOfCardsInHandPlayerX(player, game);
         informPlayerToTurn(game);
+    }
+
+    private void handleReverse(Game game, Player player, Card card) {
+        // remove card from player hand
+        player.getHand().removeCard(card);
+
+        //place card in discard pile
+        game.getDiscardPile().discardCard(card);
+        //change turn direction
+        game.reverseTurndirection();
+        //increase turn
+        game.nextTurn();
+    }
+
+    private void handleHit2(Game game, Player player, Card card) {
+        //TODO handle Hit_2 case when next player wants to HIT2 aswell
+
+        //next player has to draw 2 times before next players turn
+        // find next player
+        Player victim = game.getNextPlayer();
+        // Let them draw twice
+        List<CardDTO> cardDTOS1 = playerDrawsCard(game, victim);
+        List<CardDTO> cardDTOS2 = playerDrawsCard(game, victim);
+        cardDTOS1.addAll(cardDTOS2);
+        //remove card from player hand
+        player.getHand().removeCard(card);
+        //set card on Top
+        game.getDiscardPile().discardCard(card);
+        game.nextTurn();
+        // send drawn cards
+        messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS1);
+        game.nextTurn();
+        game.nextTurn();
+    }
+
+    private void handleSkip(Game game, Player player, Card card) {
+        // remove card & set it on top
+        player.getHand().removeCard(card);
+        game.getDiscardPile().discardCard(card);
+        // skip next players turn
+        game.nextTurn();
+        game.nextTurn();
+    }
+
+    private void handleDiscardAll(Game game, Player player, Card card) {
+        // TODO input discard all card 4 cards exists each color once
+        // discards all cards of that color from user
+        // discard all doesnt work if it leads to instant win
+        //remove discard all Card can be played anyways and Set it on discardpile
+        player.getHand().removeCard(card);
+        game.getDiscardPile().discardCard(card);
+        //check if it leads to instantwin witout possible unocall
+        int numberOfCards=0;
+        int numberOfCardsToDiscard =0;
+        for (Card cardToCount : player.getHand().getCards()
+        ) {
+            ++numberOfCards;
+            if (cardToCount.getColor()==card.getColor()){
+                ++numberOfCardsToDiscard;
+            }
+
+        }
+        int cardsLeftInHand = numberOfCards-numberOfCardsToDiscard;
+        //if after discarding discardAllCard all other cards in Hand are discarded it is not allowed because it grants instantwin
+        List<Card> toDiscard = new ArrayList();
+
+        if (cardsLeftInHand > 0) {
+            for (Card cardToCheck : player.getHand().getCards()) {
+                if (card.getColor() == cardToCheck.getColor()) {
+                    toDiscard.add(cardToCheck);
+                }
+            }
+        }
+        else {
+            toDiscard.add(card);
+        }
+        for(Card cardToDiscard: toDiscard) {
+            player.getHand().removeCard(cardToDiscard);
+            game.getDiscardPile().discardCard(cardToDiscard);
+        }
+        game.nextTurn();
+    }
+
+    private void handleExtremeHit(Game game, Player player, Card card, User otherUser) {
+        if(card.getColor()==null){
+            throw new CardColorNotChoosenException();
+        }
+        //remove card from hand
+        player.getHand().removeCard(card);
+        //set card on Top
+        game.getDiscardPile().discardCard(card);
+        //choosen Player draws
+        Player victim;
+        try {
+            victim = game.getPlayerFromUser(otherUser);
+        } catch(NullPointerException e) {
+            throw new PlayerNotInGameException();
+        }
+        List<CardDTO> cardDTOS = playerDrawsCard(game, victim);
+        //send drawed cards to player
+        messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS);
+
+        game.nextTurn();
+    }
+
+    private void handleWildcard(Game game, Player player,Card card) {
+        // input wildcard + color taken from card attribute
+        // topmost card color set to choosen color
+        //remove card from players hand
+        //set choosen color
+        // is already set in Attribute color in client but check if not null
+        if(card.getColor()==null){
+            throw new CardColorNotChoosenException();
+
+        }
+        player.getHand().removeCard(card);
+        //set card on Top
+        game.getDiscardPile().discardCard(card);
+        game.nextTurn();
     }
 
     private boolean playersTurn(Player player, Game game) {
