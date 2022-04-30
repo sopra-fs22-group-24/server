@@ -320,12 +320,7 @@ public class GameServiceTest {
 
     @Test
     public void playCard_whenHit2_thenNextPlayerHasToDraw() {
-        /*
-        WARNING FLAKY TEST
-        In this test we test a function that uses randomness, because of this there is the possibility that a player
-        doesn't have to draw a card and this test will fail.
-        If this test fails retry and hopefully it will pass.
-         */
+
         Game game = new Game();
         long gameId = 128;
         game.setGameId(gameId);
@@ -709,6 +704,498 @@ public class GameServiceTest {
         gameService.playCard(gameId, u, card, null, false);
         assertEquals(p3.getUser().getId(), game.getPlayerTurn().getUser().getId());
     }
+
+    @Test
+    public void playCard_whenPlayerSaysUnoAndApplicable_thenUnoIsSaid() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.REVERSE);
+        Hand hand = new Hand();
+        hand.addCard(card);
+        hand.addCard(card);
+
+
+        Hand hand2 = new Hand();
+        Hand hand3 = new Hand();
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        User u3 = new User();
+        u3.setId(3l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Player p3 = new Player();
+        p3.setUser(u3);
+        p3.setHand(hand3);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+        players.add(p3);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        gameService.playCard(gameId, u, card, null, true);
+        assertTrue(p.isHasSaidUno());
+    }
+
+    @Test
+    public void playCard_whenPlayerSaysUnoAndIsNotApplicable_thenUnoIsSaidIsFalse() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.REVERSE);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+
+        Hand hand2 = new Hand();
+        Hand hand3 = new Hand();
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        User u3 = new User();
+        u3.setId(3l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Player p3 = new Player();
+        p3.setUser(u3);
+        p3.setHand(hand3);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+        players.add(p3);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        gameService.playCard(gameId, u, card, null, true);
+        assertFalse(p.isHasSaidUno());
+    }
+
+    @Test
+    public void playCard_ifPlayerBeforeForgotToSayUnoButWasNotCalledOut_setUnoAfterNextPlayerPlayedCard() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.EIGHT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+
+        Hand hand2 = new Hand();
+        hand2.addCard(card);
+        Hand hand3 = new Hand();
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        User u3 = new User();
+        u3.setId(3l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Player p3 = new Player();
+        p3.setUser(u3);
+        p3.setHand(hand3);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+        players.add(p3);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        //forget to say uno
+        gameService.playCard(gameId, u, card, null, false);
+        //next player plays
+        gameService.playCard(gameId, u2, card, null, false);
+
+        assertTrue(p.isHasSaidUno());
+    }
+    @Test
+    public void drawCard_ifPlayerBeforeForgotToSayUnoButWasNotCalledOut_setUnoAfterNextPlayerPlayedCard() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.EIGHT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+
+        Hand hand2 = new Hand();
+        hand2.addCard(card);
+        Hand hand3 = new Hand();
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        User u3 = new User();
+        u3.setId(3l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Player p3 = new Player();
+        p3.setUser(u3);
+        p3.setHand(hand3);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+        players.add(p3);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+
+        //forget to say uno
+        gameService.playCard(gameId, u, card, null, false);
+        //next player plays
+        gameService.drawCard(gameId, u2);
+
+        assertTrue(p.isHasSaidUno());
+    }
+
+    @Test
+    public void drawCard_whenCalled_thenPlayerDrawsCards() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.EIGHT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+
+        Hand hand2 = new Hand();
+        hand2.addCard(card);
+        Hand hand3 = new Hand();
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        User u3 = new User();
+        u3.setId(3l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Player p3 = new Player();
+        p3.setUser(u3);
+        p3.setHand(hand3);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+        players.add(p3);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+        Mockito.when(random.nextInt(12)).thenReturn(1);
+        //forget to say uno
+        gameService.drawCard(gameId, u);
+
+        assertEquals(2,p.getHand().getCardCount(), "invalid amount of cards drawn");
+        assertTrue(p2.getUser().getId().equals(game.getPlayerTurn().getUser().getId()));
+    }
+    @Test
+    public void drawCard_whenNotPlayerTurn_thenThrow() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.EIGHT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+
+        Hand hand2 = new Hand();
+        hand2.addCard(card);
+        Hand hand3 = new Hand();
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        User u3 = new User();
+        u3.setId(3l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Player p3 = new Player();
+        p3.setUser(u3);
+        p3.setHand(hand3);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+        players.add(p3);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+        Mockito.when(random.nextInt(12)).thenReturn(1);
+        //forget to say uno
+        assertThrows(NotPlayerTurnException.class,() -> gameService.drawCard(gameId, u2));
+
+
+    }
+    @Test
+    public void callOutPlayer_whenCalledOutPlayerSaidUno_thenThrow() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.EIGHT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+
+        Hand hand2 = new Hand();
+        hand2.addCard(card);
+        Hand hand3 = new Hand();
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        User u3 = new User();
+        u3.setId(3l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+        p.setHasSaidUno(true);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Player p3 = new Player();
+        p3.setUser(u3);
+        p3.setHand(hand3);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+        players.add(p3);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+        assertThrows(InvalidCallOutException.class,() -> gameService.callOutPlayer(gameId, u2,u));
+
+
+    }
+    @Test
+    public void callOutPlayer_whenCalledOutHasMoreThenOneCard_thenThrow() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.EIGHT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+        hand.addCard(card);
+
+
+        Hand hand2 = new Hand();
+        hand2.addCard(card);
+        Hand hand3 = new Hand();
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        User u3 = new User();
+        u3.setId(3l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Player p3 = new Player();
+        p3.setUser(u3);
+        p3.setHand(hand3);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+        players.add(p3);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+        assertThrows(InvalidCallOutException.class,() -> gameService.callOutPlayer(gameId, u2,u));
+
+
+    }
+
+    @Test
+    public void callOutPlayer_whenCalledOutPlayerForgotToSayUno_thenCalledOutPlayerHastoDraw() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.EIGHT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+
+        Hand hand2 = new Hand();
+        hand2.addCard(card);
+        Hand hand3 = new Hand();
+        User u = new User();
+        u.setId(1l);
+
+        User u2 = new User();
+        u2.setId(2l);
+
+        User u3 = new User();
+        u3.setId(3l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Player p3 = new Player();
+        p3.setUser(u3);
+        p3.setHand(hand3);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+        players.add(p3);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+        System.out.println(p.getHand().getCardCount());
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+        Mockito.when(random.nextInt(12)).thenReturn(1);
+        gameService.callOutPlayer(gameId, u2,u);
+
+        assertEquals(3,p.getHand().getCardCount());
+
+
+    }
+
     @Test
     public void getGameFromGameId_Success(){}
 

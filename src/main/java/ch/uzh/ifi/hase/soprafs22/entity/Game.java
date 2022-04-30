@@ -140,4 +140,21 @@ public class Game implements Serializable  {
 
         return players.get(turnIndexCopy);
     }
+
+    public Player getLastPlayer() {
+        int turnIndexCopy = turnIndex;
+        if(reverse) {
+            turnIndexCopy++;
+        } else {
+            turnIndexCopy--;
+        }
+        if(turnIndexCopy < 0) {
+            turnIndexCopy = players.size()-1;
+        }
+        if(turnIndexCopy >= players.size()) {
+            turnIndexCopy = 0;
+        }
+
+        return players.get(turnIndexCopy);
+    }
 }

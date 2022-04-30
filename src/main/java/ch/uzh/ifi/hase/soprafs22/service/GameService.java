@@ -109,13 +109,16 @@ public class GameService {
         }
         // handle uno
         // reset uno
-        player.setHasSaidUno(false);
         //set uno if applicable
         if(uno){
             if(checkUnoCanBeCalled(player)) {
                 player.setHasSaidUno(true);
             }
+        } else {
+            player.setHasSaidUno(false);
         }
+
+        Player lastPlayer = game.getLastPlayer();
 
         if(card.getSymbol() == Symbol.WILDCARD) {
             handleWildcard(game, player,card);
@@ -135,12 +138,16 @@ public class GameService {
         }
 
 
+        // set uno to true for last player
+        lastPlayer.setHasSaidUno(true);
         // persist changes to game from move
         gameRepository.saveAndFlush(game);
         //update the player/players State here because always topmost card & nrOfcardPlayerx and next turn called
         informPlayers_TopMostCard(game,card);
         informPlayers_nrOfCardsInHandPlayerX(player, game);
         informPlayerToTurn(game);
+
+
     }
 
     private void handleReverse(Game game, Player player, Card card) {
@@ -318,9 +325,6 @@ public class GameService {
         return player.getHand().getCardCount()==2;
     }
     // TODO remember if uno was called by the last player whos turn it was
-    public boolean checkIfCalloutApplicable(){
-        return true;
-    }
 
     /*
     After all users joined the initialize will send relevant data (initial hand, first card on discard pile, etc.) to users
@@ -361,7 +365,12 @@ public class GameService {
     public void drawCard(long gameId, User user) {
         Game game = getGameFromGameId(gameId);
         Player player = authenticateUser(user, game);
+        //check if it is the players turn
+        if(!playersTurn(player, game)) {
+            throw new NotPlayerTurnException();
+        }
 
+        Player lastPlayer = game.getLastPlayer();
         List<CardDTO> cardDTOS = playerDrawsCard(game, player);
 
         // inform players of the card count of the drawing player
@@ -375,6 +384,8 @@ public class GameService {
 
         // increase turn and inform players
         game.nextTurn();
+        lastPlayer.setHasSaidUno(true);
+        gameRepository.saveAndFlush(game);
         Player playerTurn = game.getPlayerTurn();
         messageService.sendToGame(gameId, "playerTurn", DTOMapper.INSTANCE.convertEntityToUserGetDTO(playerTurn.getUser()));
 
