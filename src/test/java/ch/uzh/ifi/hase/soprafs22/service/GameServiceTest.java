@@ -1199,6 +1199,53 @@ public class GameServiceTest {
 
     @Test
     public void initializeTest() {
+        //setup before test
+        Long id = 12L;
+        User user = new User();
+        user.setId(12L);
+        Game game = new Game();
+        //add players
+        Vector<Player> players = new Vector<>();
+        int k=0;
+        for (int i = 0; i<4;++i){
+            Player playertoadd = new Player();
+            if(k==0){
+                playertoadd.setUser(user);
+                k=2;
+            }
+            else {
+                playertoadd.setUser(new User());
+            }
+            players.add(playertoadd);
+        }
+        //create deck
+        Deck deck = new Deck();
+        //add Hand to Player with
+        for(Player playerToAddCards: players) {
+            Hand hand = new Hand();
+            for(int i=0; i<7; i++) {
+                hand.addCard(deck.drawCard());
+            }
+            playerToAddCards.setHand(hand);
+        }
+        DiscardPile discardPile = new DiscardPile();
+        discardPile.discardCard(deck.drawCard());
+        game.setDeck(deck);
+        game.setDiscardPile(discardPile);
+        game.setPlayers(players);
+        // TODO spy messageservice and verify invokations otherwise this test doesnt make sense :D
+       // Mockito.spy(messageService)
+        //mock repo
+        Mockito.when(gameRepository.findByGameId(id)).thenReturn(game);
+
+        //call function with arguments needed
+        gameService.initialize(id,user);
+        // assert everyone has 7 cards
+        assertEquals(4 , game.getPlayers().size());
+        for(int i=0; i<4;++i){
+           Player playertoTest = game.getPlayers().get(i);
+          assertEquals(7 , playertoTest.getHand().getCardCount() );
+        }
     }
 
     @Test
