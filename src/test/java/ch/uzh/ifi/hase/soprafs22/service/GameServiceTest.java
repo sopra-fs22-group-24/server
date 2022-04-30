@@ -54,7 +54,7 @@ public class GameServiceTest {
         long gameId = 128;
         Card card = new Card();
 
-        assertThrows(GameNotExistsException.class,() -> gameService.playCard(gameId, user, card, null, false));
+        assertThrows(GameNotExistsException.class, () -> gameService.playCard(gameId, user, card, null, false));
     }
 
     @Test
@@ -199,7 +199,7 @@ public class GameServiceTest {
         gameService.playCard(gameId, user1, card, null, false);
 
         assertFalse(player1.getHand().containsCard(card), "card still in player hand");
-        assertEquals( 1, player1.getHand().getCardCount(), "card count is wrong");
+        assertEquals(1, player1.getHand().getCardCount(), "card count is wrong");
         Card topMostCard = pile.getTopmostCard();
         assertEquals(topMostCard.getColor(), card.getColor(), "Color not the same");
         assertEquals(topMostCard.getSymbol(), card.getSymbol(), "Symbol not the same");
@@ -226,7 +226,7 @@ public class GameServiceTest {
 
         Mockito.when(lobbyService.findByLobbyId(lobbyId)).thenReturn(lobby);
 
-        assertThrows(UserNotLobbyAdminException.class,() -> gameService.createGame(lobbyId,u2));
+        assertThrows(UserNotLobbyAdminException.class, () -> gameService.createGame(lobbyId, u2));
 
     }
 
@@ -249,9 +249,9 @@ public class GameServiceTest {
 
         Mockito.when(lobbyService.findByLobbyId(lobbyId)).thenReturn(lobby);
         Mockito.when(gameRepository.save(Mockito.any())).then(AdditionalAnswers.returnsFirstArg());
-        Game game = gameService.createGame(lobbyId,u1);
-        assertEquals(u1.getId(),game.getPlayers().get(0).getUser().getId());
-        assertEquals(u2.getId(),game.getPlayers().get(1).getUser().getId());
+        Game game = gameService.createGame(lobbyId, u1);
+        assertEquals(u1.getId(), game.getPlayers().get(0).getUser().getId());
+        assertEquals(u2.getId(), game.getPlayers().get(1).getUser().getId());
         assertEquals(7, game.getPlayers().get(0).getHand().getCardCount());
         assertEquals(7, game.getPlayers().get(1).getHand().getCardCount());
 
@@ -281,7 +281,6 @@ public class GameServiceTest {
         player3.setUser(user3);
 
 
-
         Card card = new Card(Color.BLUE, Symbol.SKIP);
         Card card2 = new Card(Color.RED, Symbol.EIGHT);
 
@@ -303,14 +302,12 @@ public class GameServiceTest {
         game.setDiscardPile(pile);
 
 
-
-
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
 
         gameService.playCard(gameId, user1, card, null, false);
 
         assertFalse(player1.getHand().containsCard(card), "card still in player hand");
-        assertEquals( 1, player1.getHand().getCardCount(), "card count is wrong");
+        assertEquals(1, player1.getHand().getCardCount(), "card count is wrong");
         Card topMostCard = pile.getTopmostCard();
         assertEquals(topMostCard.getColor(), card.getColor(), "Color not the same");
         assertEquals(topMostCard.getSymbol(), card.getSymbol(), "Symbol not the same");
@@ -363,9 +360,8 @@ public class GameServiceTest {
         gameService.playCard(gameId, user1, card, null, false);
 
 
-
         assertFalse(player1.getHand().containsCard(card), "card still in player hand");
-        assertEquals( 1, player1.getHand().getCardCount(), "card count is wrong");
+        assertEquals(1, player1.getHand().getCardCount(), "card count is wrong");
         Card topMostCard = pile.getTopmostCard();
         assertEquals(topMostCard.getColor(), card.getColor(), "Color not the same");
         assertEquals(topMostCard.getSymbol(), card.getSymbol(), "Symbol not the same");
@@ -397,11 +393,11 @@ public class GameServiceTest {
 
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
 
-        gameService.playCard(gameId, u, card,null, false);
+        gameService.playCard(gameId, u, card, null, false);
 
         Card topMostCard = d.getTopmostCard();
-        assertEquals(card.getColor(),topMostCard.getColor());
-        assertEquals(card.getSymbol(),topMostCard.getSymbol());
+        assertEquals(card.getColor(), topMostCard.getColor());
+        assertEquals(card.getSymbol(), topMostCard.getSymbol());
     }
 
     @Test
@@ -428,7 +424,7 @@ public class GameServiceTest {
 
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
 
-        assertThrows(CardColorNotChoosenException.class, () -> gameService.playCard(gameId, u, card,null, false));
+        assertThrows(CardColorNotChoosenException.class, () -> gameService.playCard(gameId, u, card, null, false));
 
     }
 
@@ -471,7 +467,7 @@ public class GameServiceTest {
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
         Mockito.when(random.nextInt(12)).thenReturn(1);
 
-        gameService.playCard(gameId, u, card,u2, false);
+        gameService.playCard(gameId, u, card, u2, false);
 
         Card topMostCard = d.getTopmostCard();
         assertEquals(card.getColor(), topMostCard.getColor(), "Color not correct");
@@ -560,6 +556,7 @@ public class GameServiceTest {
 
         assertThrows(PlayerNotInGameException.class, () -> gameService.playCard(gameId, u, card, null, false));
     }
+
     @Test
     public void playCard_whenDiscardAll_thenRemoveCardsOfSameColor() {
         long gameId = 128l;
@@ -866,6 +863,7 @@ public class GameServiceTest {
 
         assertTrue(p.isHasSaidUno());
     }
+
     @Test
     public void drawCard_ifPlayerBeforeForgotToSayUnoButWasNotCalledOut_setUnoAfterNextPlayerPlayedCard() {
         long gameId = 128l;
@@ -975,9 +973,10 @@ public class GameServiceTest {
         //forget to say uno
         gameService.drawCard(gameId, u);
 
-        assertEquals(2,p.getHand().getCardCount(), "invalid amount of cards drawn");
+        assertEquals(2, p.getHand().getCardCount(), "invalid amount of cards drawn");
         assertTrue(p2.getUser().getId().equals(game.getPlayerTurn().getUser().getId()));
     }
+
     @Test
     public void drawCard_whenNotPlayerTurn_thenThrow() {
         long gameId = 128l;
@@ -1028,10 +1027,11 @@ public class GameServiceTest {
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
         Mockito.when(random.nextInt(12)).thenReturn(1);
         //forget to say uno
-        assertThrows(NotPlayerTurnException.class,() -> gameService.drawCard(gameId, u2));
+        assertThrows(NotPlayerTurnException.class, () -> gameService.drawCard(gameId, u2));
 
 
     }
+
     @Test
     public void callOutPlayer_whenCalledOutPlayerSaidUno_thenThrow() {
         long gameId = 128l;
@@ -1081,10 +1081,11 @@ public class GameServiceTest {
         game.setDeck(deck);
 
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
-        assertThrows(InvalidCallOutException.class,() -> gameService.callOutPlayer(gameId, u2,u));
+        assertThrows(InvalidCallOutException.class, () -> gameService.callOutPlayer(gameId, u2, u));
 
 
     }
+
     @Test
     public void callOutPlayer_whenCalledOutHasMoreThenOneCard_thenThrow() {
         long gameId = 128l;
@@ -1135,7 +1136,7 @@ public class GameServiceTest {
         game.setDeck(deck);
 
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
-        assertThrows(InvalidCallOutException.class,() -> gameService.callOutPlayer(gameId, u2,u));
+        assertThrows(InvalidCallOutException.class, () -> gameService.callOutPlayer(gameId, u2, u));
 
 
     }
@@ -1189,45 +1190,26 @@ public class GameServiceTest {
         System.out.println(p.getHand().getCardCount());
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
         Mockito.when(random.nextInt(12)).thenReturn(1);
-        gameService.callOutPlayer(gameId, u2,u);
+        gameService.callOutPlayer(gameId, u2, u);
 
-        assertEquals(3,p.getHand().getCardCount());
+        assertEquals(3, p.getHand().getCardCount());
 
 
     }
 
     @Test
-    public void getGameFromGameId_Success(){}
+    public void initializeTest() {
+    }
 
     @Test
-    public void getGameFromGameId_ThrowsExeption_GameNotExists(){}
+    public void drawCard_sucess() {
+    }
 
     @Test
-    public void hasCardInHand_Positive(){}
+    public void drawCard_Throws_gameNotExistsException() {
+    }
 
     @Test
-    public void hasCardInHand_Negative(){}
-
-    @Test
-    public void checkUnoCanBeCalled_Positive(){}
-
-    @Test
-    public void checkUnoCanBeCalled_Negative(){}
-    @Test
-    public void initialize_Sucess(){}
-
-    @Test
-    public void drawCard_sucess(){}
-
-    @Test
-    public void drawCard_Throws_gameNotExistsException(){}
-
-    @Test
-    public void drawCard_Throws_playerInGameException(){}
-
-    @Test
-    public void callOutPlayer_Positive(){}
-
-    @Test
-    public void callOutPlayer_Negative(){}
+    public void drawCard_Throws_playerInGameException() {
+    }
 }
