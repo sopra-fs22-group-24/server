@@ -146,6 +146,12 @@ public class GameService {
         informPlayers_TopMostCard(game,card);
         informPlayers_nrOfCardsInHandPlayerX(player, game);
         informPlayerToTurn(game);
+        List<CardDTO> playerHand = new ArrayList<>();
+        for(Card playerCard: player.getHand().getCards()) {
+            playerHand.add(DTOMapper.INSTANCE.convertCardToCardDTO(playerCard));
+        }
+        messageService.sendToUser(player.getUser().getPrincipalName(),game.getGameId()+"/playedCard", playerHand);
+
 
 
     }
@@ -353,7 +359,7 @@ public class GameService {
                 CardDTO cardDTO = DTOMapper.INSTANCE.convertCardToCardDTO(card);
                 cardDTOS.add(cardDTO);
             }
-            messageService.sendToUser(player.getUser().getPrincipalName(),gameId+"/cards", cardDTOS);
+            messageService.sendToUser(player.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTOS);
 
         }
         //inform which players turn it is

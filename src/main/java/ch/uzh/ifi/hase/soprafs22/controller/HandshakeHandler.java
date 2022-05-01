@@ -3,6 +3,8 @@ package ch.uzh.ifi.hase.soprafs22.controller;
 
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.server.ServerHttpRequest;
@@ -25,7 +27,7 @@ public class HandshakeHandler extends DefaultHandshakeHandler {
     // Custom class for storing principal
     @Autowired
     UserService userService;
-
+    private final Logger log = LoggerFactory.getLogger(HandshakeHandler.class);
     @Override
     protected Principal determineUser(ServerHttpRequest request,
                                       WebSocketHandler wsHandler,
@@ -44,9 +46,11 @@ public class HandshakeHandler extends DefaultHandshakeHandler {
         Principal principal = accessor.getUser();
         User user = userService.getUserByToken(token);
         if(user==null) {
+            log.warn("error user not found for ws {} and token {}",principal.getName(), token);
             return;
         }
         userService.addPrincipalName(user, principal.getName());
+        log.info("User {} joined via ws {}", user.getUsername(), principal.getName());
 
 
     }

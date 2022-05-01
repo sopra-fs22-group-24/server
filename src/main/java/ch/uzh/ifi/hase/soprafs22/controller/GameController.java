@@ -38,6 +38,7 @@ public class GameController {
     @MessageMapping("/game")
     public void startGame(StompHeaderAccessor accessor, LobbyPostDTO dto) {
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+
         log.info("User {} in lobby {} wants to start game", user.getUsername(), dto.getLobbyId());
         long lobbyId = dto.getLobbyId();
         try {
