@@ -93,6 +93,7 @@ public class GameService {
 
         //check player
         Player player = authenticateUser(user, game);
+        changePrincipal(user, player, game);
 
 
         //check if it is the players turn
@@ -143,7 +144,7 @@ public class GameService {
         // persist changes to game from move
         gameRepository.saveAndFlush(game);
         //update the player/players State here because always topmost card & nrOfcardPlayerx and next turn called
-        informPlayers_TopMostCard(game,card);
+        informPlayers_TopMostCard(game,game.getDiscardPile().getTopmostCard());
         informPlayers_nrOfCardsInHandPlayerX(player, game);
         informPlayerToTurn(game);
         List<CardDTO> playerHand = new ArrayList<>();
@@ -338,7 +339,8 @@ public class GameService {
     public void initialize(long gameId, User user) {
         Game game = gameRepository.findByGameId(gameId);
         authenticateUser(user, game);
-
+        Player p = game.getPlayerFromUser(user);
+        changePrincipal(user, p, game);
         // send topMostCard on discard pile
         Card topMostCard = game.getDiscardPile().getTopmostCard();
         CardDTO topMostCardDTO = DTOMapper.INSTANCE.convertCardToCardDTO(topMostCard);
@@ -359,7 +361,7 @@ public class GameService {
                 CardDTO cardDTO = DTOMapper.INSTANCE.convertCardToCardDTO(card);
                 cardDTOS.add(cardDTO);
             }
-            messageService.sendToUser(player.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTOS);
+            messageService.sendToUser(player.getUser().getPrincipalName(),gameId+"/playedCard", cardDTOS);
 
         }
         //inform which players turn it is
@@ -368,17 +370,31 @@ public class GameService {
 
     }
 
+    private void changePrincipal(User user, Player player, Game game) {
+        if(user.getPrincipalName().equals(player.getUser().getPrincipalName())) {
+            return;
+        }
+        player.getUser().setPrincipalName(user.getPrincipalName());
+        gameRepository.saveAndFlush(game);
+    }
+
     public void drawCard(long gameId, User user) {
         Game game = getGameFromGameId(gameId);
         Player player = authenticateUser(user, game);
+        changePrincipal(user, player, game);
+
         //check if it is the players turn
         if(!playersTurn(player, game)) {
             throw new NotPlayerTurnException();
         }
 
         Player lastPlayer = game.getLastPlayer();
-        List<CardDTO> cardDTOS = playerDrawsCard(game, player);
+        playerDrawsCard(game, player);
 
+        List<CardDTO> cardsDtos = new ArrayList<>();
+        for(Card playerCard: player.getHand().getCards()) {
+            cardsDtos.add(DTOMapper.INSTANCE.convertCardToCardDTO(playerCard));
+        }
         // inform players of the card count of the drawing player
         NCardsDTO nCardsDTO = new NCardsDTO();
         nCardsDTO.setUsername(user.getUsername());
@@ -386,7 +402,7 @@ public class GameService {
         messageService.sendToGame(gameId, "playerHasNCards", nCardsDTO);
 
         // inform player of the new cards they got
-        messageService.sendToUser(player.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTOS);
+        messageService.sendToUser(player.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardsDtos);
 
         // increase turn and inform players
         game.nextTurn();
@@ -446,6 +462,8 @@ public class GameService {
     public void callOutPlayer(long gameId, User user, User calledOutUser) {
         Game game = gameRepository.findByGameId(gameId);
         Player player = authenticateUser(user, game);
+        changePrincipal(user, player, game);
+
         Player calledOutPlayer = authenticateUser(calledOutUser, game);
 
         //check if called out player has one card and not said uno, else throw

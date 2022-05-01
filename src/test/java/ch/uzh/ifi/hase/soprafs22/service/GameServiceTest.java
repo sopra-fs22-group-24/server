@@ -80,6 +80,7 @@ public class GameServiceTest {
         User user2 = new User();
         user1.setId(1l);
         user2.setId(2l);
+        user2.setPrincipalName("x");
         Player player1 = new Player();
         Player player2 = new Player();
         Vector<Player> players = new Vector<>();
@@ -104,7 +105,7 @@ public class GameServiceTest {
         game.setGameId(gameId);
         User user = new User();
         user.setId(1l);
-
+        user.setPrincipalName("x");
         Player player = new Player();
         player.setUser(user);
 
@@ -132,7 +133,7 @@ public class GameServiceTest {
         game.setGameId(gameId);
         User user = new User();
         user.setId(1l);
-
+        user.setPrincipalName("x");
         Player player = new Player();
         player.setUser(user);
 
@@ -165,6 +166,7 @@ public class GameServiceTest {
         game.setGameId(gameId);
         User user1 = new User();
         user1.setId(1l);
+        user1.setPrincipalName("x");
 
         User user2 = new User();
         user2.setId(2l);
@@ -264,6 +266,7 @@ public class GameServiceTest {
         game.setGameId(gameId);
         User user1 = new User();
         user1.setId(1l);
+        user1.setPrincipalName("x");
 
         User user2 = new User();
         user2.setId(2l);
@@ -323,6 +326,7 @@ public class GameServiceTest {
         game.setGameId(gameId);
         User user1 = new User();
         user1.setId(1l);
+        user1.setPrincipalName("x");
 
         User user2 = new User();
         user2.setId(2l);
@@ -380,6 +384,7 @@ public class GameServiceTest {
 
         User u = new User();
         u.setId(1l);
+        u.setPrincipalName("x");
 
         Player p = new Player();
         p.setUser(u);
@@ -411,7 +416,7 @@ public class GameServiceTest {
 
         User u = new User();
         u.setId(1l);
-
+        u.setPrincipalName("x");
         Player p = new Player();
         p.setUser(u);
         p.setHand(hand);
@@ -442,6 +447,7 @@ public class GameServiceTest {
 
         User u = new User();
         u.setId(1l);
+        u.setPrincipalName("x");
 
         User u2 = new User();
         u2.setId(2l);
@@ -489,7 +495,7 @@ public class GameServiceTest {
 
         User u = new User();
         u.setId(1l);
-
+        u.setPrincipalName("x");
         User u2 = new User();
         u2.setId(2l);
 
@@ -530,7 +536,7 @@ public class GameServiceTest {
 
         User u = new User();
         u.setId(1l);
-
+        u.setPrincipalName("x");
         User u2 = new User();
         u2.setId(2l);
 
@@ -575,6 +581,7 @@ public class GameServiceTest {
 
         User u = new User();
         u.setId(1l);
+        u.setPrincipalName("x");
 
         User u2 = new User();
         u2.setId(2l);
@@ -621,6 +628,7 @@ public class GameServiceTest {
 
         User u = new User();
         u.setId(1l);
+        u.setPrincipalName("x");
 
         User u2 = new User();
         u2.setId(2l);
@@ -666,6 +674,7 @@ public class GameServiceTest {
         Hand hand3 = new Hand();
         User u = new User();
         u.setId(1l);
+        u.setPrincipalName("x");
 
         User u2 = new User();
         u2.setId(2l);
@@ -719,6 +728,7 @@ public class GameServiceTest {
         Hand hand3 = new Hand();
         User u = new User();
         u.setId(1l);
+        u.setPrincipalName("x");
 
         User u2 = new User();
         u2.setId(2l);
@@ -771,6 +781,7 @@ public class GameServiceTest {
         Hand hand3 = new Hand();
         User u = new User();
         u.setId(1l);
+        u.setPrincipalName("x");
 
         User u2 = new User();
         u2.setId(2l);
@@ -824,10 +835,11 @@ public class GameServiceTest {
         Hand hand3 = new Hand();
         User u = new User();
         u.setId(1l);
+        u.setPrincipalName("x");
 
         User u2 = new User();
         u2.setId(2l);
-
+        u2.setPrincipalName("x");
         User u3 = new User();
         u3.setId(3l);
 
@@ -881,10 +893,11 @@ public class GameServiceTest {
         Hand hand3 = new Hand();
         User u = new User();
         u.setId(1l);
+        u.setPrincipalName("x");
 
         User u2 = new User();
         u2.setId(2l);
-
+        u2.setPrincipalName("x");
         User u3 = new User();
         u3.setId(3l);
 
@@ -938,6 +951,7 @@ public class GameServiceTest {
         Hand hand3 = new Hand();
         User u = new User();
         u.setId(1l);
+        u.setPrincipalName("x");
 
         User u2 = new User();
         u2.setId(2l);
@@ -997,6 +1011,7 @@ public class GameServiceTest {
 
         User u2 = new User();
         u2.setId(2l);
+        u2.setPrincipalName("x");
 
         User u3 = new User();
         u3.setId(3l);
@@ -1052,7 +1067,7 @@ public class GameServiceTest {
 
         User u2 = new User();
         u2.setId(2l);
-
+        u2.setPrincipalName("x");
         User u3 = new User();
         u3.setId(3l);
 
@@ -1107,7 +1122,7 @@ public class GameServiceTest {
 
         User u2 = new User();
         u2.setId(2l);
-
+        u2.setPrincipalName("x");
         User u3 = new User();
         u3.setId(3l);
 
@@ -1158,10 +1173,11 @@ public class GameServiceTest {
         Hand hand3 = new Hand();
         User u = new User();
         u.setId(1l);
+        u.setPrincipalName("x");
 
         User u2 = new User();
         u2.setId(2l);
-
+        u2.setPrincipalName("x");
         User u3 = new User();
         u3.setId(3l);
 
@@ -1203,6 +1219,8 @@ public class GameServiceTest {
         Long id = 12L;
         User user = new User();
         user.setId(12L);
+        user.setPrincipalName("x");
+
         Game game = new Game();
         //add players
         Vector<Player> players = new Vector<>();

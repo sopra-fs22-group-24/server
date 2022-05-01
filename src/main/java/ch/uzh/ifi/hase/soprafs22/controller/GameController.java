@@ -73,7 +73,12 @@ public class GameController {
 
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
         Card card  = playCardDTO.getCard();
-        User otherUser = playCardDTO.getUser();
+        User otherUser;
+        try {
+            otherUser = userService.getUserByUsername(playCardDTO.getUser().getUsername());
+        } catch (NullPointerException e) {
+            otherUser = null;
+        }
         boolean uno = playCardDTO.getUno();
         try {
             gameService.playCard(gameId, user, card, otherUser, uno);
@@ -95,6 +100,7 @@ public class GameController {
     @MessageMapping("/game/{gameId}/drawCard")
     public void drawCard(StompHeaderAccessor accessor, @DestinationVariable("gameId") long gameId) {
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+        log.info("user {} wants to draw", user.getUsername());
         try {
             gameService.drawCard(gameId, user);
         } catch (GameException e) {
