@@ -305,7 +305,7 @@ public class GameService {
         return false;
     }
 
-    public Game getGameFromGameId(long gameId) {
+    private Game getGameFromGameId(long gameId) {
         Game game = gameRepository.findByGameId(gameId);
         if (game == null) {
             throw new GameNotExistsException();
@@ -324,10 +324,10 @@ public class GameService {
         return player;
     }
 
-    public boolean hasCardInHand(Player player, Card card) {
+    private boolean hasCardInHand(Player player, Card card) {
         return player.getHand().containsCard(card);
     }
-    public boolean checkUnoCanBeCalled(Player player){
+    private boolean checkUnoCanBeCalled(Player player){
         return player.getHand().getCardCount()==2;
     }
     // TODO remember if uno was called by the last player whos turn it was
