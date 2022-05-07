@@ -6,7 +6,8 @@ public enum Color implements Serializable {
     RED("Red"),
     BLUE("Blue"),
     GREEN("Green"),
-    YELLOW("Yellow");
+    YELLOW("Yellow"),
+    NULL("NULL");
     private static final long serialVersionUID = 1L;
 
     String stringRepresentation;
