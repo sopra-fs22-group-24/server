@@ -8,10 +8,7 @@ import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.UserNotLobbyAdminException;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.*;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.CalledOutDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.CardDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.NCardsDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.utils.Globals;
 import org.slf4j.Logger;
@@ -175,6 +172,41 @@ public class GameService {
     }
 
     private void handleWin(Game game, Player player) {
+        /*
+        When you are out of cards, you get points for cards left in opponents’ hands as follows:
+        All cards through 9 Face Value
+        Reverse 20 Points
+        Skip 20 Points
+        Hit 2 20 Points
+        Discard All 30 Points
+        Wild 50 Points
+        Extreme Hit 50 Points
+        The WINNER is the first player to reach 500 points. However, the game may be scored by
+        keeping a running total of the points each player is caught with at the end of each hand.
+        When one player reaches 500 points, the player with the lowest points is the winner.
+         */
+        //calculate score
+        int score = 0;
+        for(Player p : game.getPlayers()) {
+            for(Card card : p.getHand().getCards()) {
+                score += card.getSymbol().getScore();
+            }
+        }
+
+        //set score
+        int oldScore = player.getScore();
+        player.setScore(oldScore+score);
+        gameRepository.saveAndFlush(game);
+        //send scores to players
+        List<ScoreDTO> scoreDTOS = new ArrayList<>();
+        for(Player p : game.getPlayers()) {
+            ScoreDTO scoreDTO = new ScoreDTO();
+            scoreDTO.setUsername(p.getUser().getUsername());
+            scoreDTO.setScore(p.getScore());
+            scoreDTOS.add(scoreDTO);
+        }
+
+        messageService.sendToGame(game.getGameId(), "score", scoreDTOS);
     }
 
     private void informPlayerOnHand(Player player, Game game) {

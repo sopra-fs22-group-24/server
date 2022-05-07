@@ -21,6 +21,8 @@ public class Player implements Serializable {
     @Column
     boolean hasSaidUno;
 
+    @Column
+    int score;
     public User getUser() {
         return user;
     }
@@ -45,5 +47,11 @@ public class Player implements Serializable {
         return hasSaidUno;
     }
 
+    public void setScore(int score) {
+        this.score = score;
+    }
 
+    public int getScore() {
+        return score;
+    }
 }

@@ -13,13 +13,12 @@ public enum Symbol implements Serializable {
     SEVEN("7"),
     EIGHT("8"),
     NINE("9"),
-    TEN("10"),
-    WILDCARD("Wildcard"),
-    REVERSE("Reverse"),
-    HIT_2("Hit 2"),
-    SKIP("Skip"),
-    DISCARD_ALL("Discard all"),
-    EXTREME_HIT("Extreme Hit");
+    REVERSE("20"),
+    HIT_2("20"),
+    SKIP("20"),
+    DISCARD_ALL("30"),
+    WILDCARD("50"),
+    EXTREME_HIT("50");
 
     private static final long serialVersionUID = 1L;
 
@@ -33,6 +32,9 @@ public enum Symbol implements Serializable {
 
     public String getString(){
         return stringRepresentation;
+    }
+    public int getScore() {
+        return Integer.parseInt(stringRepresentation);
     }
 }
 

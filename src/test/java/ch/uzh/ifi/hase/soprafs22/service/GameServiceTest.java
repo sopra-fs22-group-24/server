@@ -1210,9 +1210,59 @@ public class GameServiceTest {
 
         assertEquals(3, p.getHand().getCardCount());
 
-
     }
+    @Test
+    public void scoring_whenPlayerHasNoCardsLeft_thenScoringCorrect() {
+        long gameId = 128l;
 
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.EIGHT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+        //give p2 one of each card
+        Hand hand2 = new Hand();
+        for (Symbol symbol : Symbol.values()) {
+            hand2.addCard(new Card(Color.BLUE, symbol));
+        }
+
+        int expectedScore = 235;
+
+        User u = new User();
+        u.setId(1l);
+        u.setPrincipalName("x");
+
+        User u2 = new User();
+        u2.setId(2l);
+
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+        System.out.println(p.getHand().getCardCount());
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+        Mockito.when(random.nextInt(12)).thenReturn(1);
+        gameService.playCard(gameId, u, card, null, false);
+
+
+        assertEquals(expectedScore, p.getScore(), "invalid score");
+    }
     @Test
     public void initializeTest() {
         //setup before test
