@@ -26,6 +26,9 @@ public class Deck implements Serializable {
         this.deck = new Vector<>();
         // initialize deck
         for(Color color: Color.values() ) {
+            if (color == Color.NULL) {
+                continue;
+            }
             for(Symbol symbol: Symbol.values()) {
                 if (symbol == Symbol.WILDCARD || symbol == Symbol.EXTREME_HIT) {
                     deck.add(new Card(Color.NULL, symbol));
