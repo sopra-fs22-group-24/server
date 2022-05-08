@@ -12,8 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -141,6 +143,22 @@ public class UserService {
         log.debug("updated token for User: {}",user);
         return user;
     }
+    public  void setProfilePicture (long id, MultipartFile file) {
+        User user = getUserById(id);
+        try {
+            user.setPicture(file.getBytes());
+        }
+        catch (IOException e) {
+            throw new RuntimeException("profilpicture could npt be read in backend",e);
+        }
+        userRepository.save(user);
+    }
+
+    public byte[] getProfilePicture(long id){
+        User user = getUserById(id);
+        return user.getPicture();
+    }
+
 /*
     public User authenticateUser(StompHeaderAccessor accessor) {
         String token = StompHeaderUtil.getNativeHeaderField(accessor, "token");

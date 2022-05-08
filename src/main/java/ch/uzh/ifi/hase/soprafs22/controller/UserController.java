@@ -4,8 +4,11 @@ import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
+import org.hibernate.mapping.Any;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +58,19 @@ public class UserController {
     return DTOMapper.INSTANCE.convertEntityToUserGetTokenDTO(createdUser);
   }
 
+    @PostMapping("/users/{id}/picture")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public void setProfilePicture(@RequestBody MultipartFile file, @PathVariable("userId") long id) {
+        userService.setProfilePicture(id,file);
+    }
+
+    @GetMapping(value = "/users/{id}/picture")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public byte[] getProfilePicture(@PathVariable("id") long id) {
+        return userService.getProfilePicture(id);
+    }
     @GetMapping(value = "/users/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody

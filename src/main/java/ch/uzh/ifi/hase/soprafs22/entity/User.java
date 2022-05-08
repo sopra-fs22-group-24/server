@@ -48,6 +48,18 @@ public class User implements Serializable {
 
     @Column()
     private String principalName;
+
+    @Lob
+    @Column(name = "picture",nullable = true)
+    private byte [] picture;
+
+    public byte[] getPicture() {
+        return picture;
+    }
+
+    public void setPicture(byte[] profilpicture) {
+        this.picture = profilpicture;
+    }
     public Long getId() {
         return id;
     }
