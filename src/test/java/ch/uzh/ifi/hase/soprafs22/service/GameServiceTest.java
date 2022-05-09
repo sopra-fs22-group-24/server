@@ -360,7 +360,7 @@ public class GameServiceTest {
         Deck deck = new Deck();
         game.setDeck(deck);
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
-        Mockito.when(random.nextInt(12)).thenReturn(1);
+        Mockito.when(random.nextInt(Mockito.anyInt())).thenReturn(2);
         gameService.playCard(gameId, user1, card, null, false);
 
 
@@ -471,7 +471,7 @@ public class GameServiceTest {
         game.setDeck(deck);
 
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
-        Mockito.when(random.nextInt(12)).thenReturn(1);
+        Mockito.when(random.nextInt(Mockito.anyInt())).thenReturn(2);
 
         gameService.playCard(gameId, u, card, u2, false);
 
@@ -983,7 +983,7 @@ public class GameServiceTest {
         game.setDeck(deck);
 
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
-        Mockito.when(random.nextInt(12)).thenReturn(1);
+        Mockito.when(random.nextInt(Mockito.anyInt())).thenReturn(2);
         //forget to say uno
         gameService.drawCard(gameId, u);
 
@@ -1205,7 +1205,7 @@ public class GameServiceTest {
         game.setDeck(deck);
         System.out.println(p.getHand().getCardCount());
         Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
-        Mockito.when(random.nextInt(12)).thenReturn(1);
+        Mockito.when(random.nextInt(Mockito.anyInt())).thenReturn(2);
         gameService.callOutPlayer(gameId, u2, u);
 
         assertEquals(3, p.getHand().getCardCount());
