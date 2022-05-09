@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Comparator;
 
 /**
  * Internal User Representation
@@ -15,9 +16,11 @@ import java.io.Serializable;
  * - unique = true -> this value must be unqiue across the database -> composes
  * the primary key
  */
+
+
 @Entity
 @Table(name = "USER")
-public class User implements Serializable {
+public class User implements Serializable, Comparable<User> {
 
     private static final long serialVersionUID = 1L;
 
@@ -120,5 +123,10 @@ public class User implements Serializable {
 
     public void setPrincipalName(String principalName) {
         this.principalName = principalName;
+    }
+
+    @Override
+    public int compareTo(User o) {
+        return score - o.getScore();
     }
 }

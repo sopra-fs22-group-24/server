@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
@@ -16,9 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * User Service
@@ -41,7 +40,12 @@ public class UserService {
   }
 //get all users
   public List<User> getUsers() {
-    return this.userRepository.findAll();
+      //sort list according to score of player
+      List<User> listusers =  this.userRepository.findAll();
+      Collections.sort((listusers));
+
+      return listusers;
+
   }
 
   //create a new user
