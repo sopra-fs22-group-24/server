@@ -303,7 +303,62 @@ public class UserControllerTest {
         mockMvc.perform(putRequest)
                 .andExpect(status().isNoContent());
     }
+/*    @Test
+    public void GetProfilePicture_sucess() throws Exception{
+        String returnvalue = "helloworl";
+        PictureDTO pictureDTO = new PictureDTO();
+        pictureDTO.setPicture(returnvalue);
+        //mock service
+        Mockito.when(userService.getProfilePicture(8L)).thenReturn(returnvalue);
+        //build request
+        MockHttpServletRequestBuilder getRequest = get("/users/8/picture")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(pictureDTO));
+        // then send request and verify
+        mockMvc.perform(getRequest)
+                .andExpect(jsonPath("$.picture", is(returnvalue)));
+    }*/
 
+    /*@Test
+    public void GetProfilePicture_Throws_usernotfound() throws Exception{
+        //mock service
+        Mockito.when(userService.getProfilePicture(8L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+        //build request
+        MockHttpServletRequestBuilder getRequest = get("/users/8/picture");
+        // then send request and verify
+        mockMvc.perform(getRequest)
+                .andExpect(status().isNotFound());
+    }*/
+
+    /*@Test void SetprofilePicture_invalidUserid() throws Exception{
+        String returnvalue = "helloworl";
+        PictureDTO pictureDTO = new PictureDTO();
+        pictureDTO.setPicture(returnvalue);
+        //mock service
+        Mockito.when(userService.setProfilePicture(8L,returnvalue)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+        //build request
+        MockHttpServletRequestBuilder postRequest = post("/users/8/picture")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(pictureDTO));
+
+        mockMvc.perform(postRequest).andExpect(status().isNotFound());
+
+    }*/
+ /*   @Test void SetprofilePicture_sucess() throws Exception{
+        String returnvalue = "helloworl";
+        PictureDTO pictureDTO = new PictureDTO();
+        pictureDTO.setPicture(returnvalue);
+        //mock service
+        Mockito.when(userService.setProfilePicture(8L,returnvalue)).thenReturn(returnvalue);
+        //build request
+        MockHttpServletRequestBuilder postRequest = post("/users/8/picture")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(pictureDTO));
+
+        mockMvc.perform(postRequest).andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.picture", is(returnvalue)));
+
+    }*/
 
     /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
