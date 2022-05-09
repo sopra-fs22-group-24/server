@@ -481,8 +481,10 @@ public class GameService {
 
         int max = Globals.maxDrawCount();
         int min = Globals.minDrawCount();
+        int[] distribution = {0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,5,5,5,6,6,7,7,8,9,10,11,12};
+
         //int randomCardAmount = (int) ((Math.random() * (max - min)) + min);
-        int randomCardAmount = random.nextInt(max);
+        int randomCardAmount = distribution[random.nextInt(distribution.length)];
 
         List<CardDTO> cardDTOS = new ArrayList<>();
         for(int i=0; i< randomCardAmount;i++) {
