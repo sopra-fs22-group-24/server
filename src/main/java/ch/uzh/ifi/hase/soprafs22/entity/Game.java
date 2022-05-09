@@ -17,10 +17,10 @@ public class Game implements Serializable  {
     @GeneratedValue
     private Long gameId;
 
-    @Column(nullable = false, length = 2048)
+    @Column(nullable = false, length = 4096)
     private Deck deck;
 
-    @Column(nullable = false, length = 2048)
+    @Column(nullable = false, length = 4096)
     private DiscardPile discardPile;
 
     @Column(nullable = false, length = 32768)

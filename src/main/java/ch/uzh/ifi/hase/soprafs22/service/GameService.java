@@ -8,9 +8,7 @@ import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.UserNotLobbyAdminException;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.*;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.CalledOutDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.CardDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.NCardsDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.utils.Globals;
 import org.slf4j.Logger;
@@ -111,6 +109,7 @@ public class GameService {
         // handle uno
         // reset uno
         //set uno if applicable
+        handleUno(game, player, uno);
         if(uno){
             if(checkUnoCanBeCalled(player)) {
                 player.setHasSaidUno(true);
@@ -146,15 +145,76 @@ public class GameService {
         //update the player/players State here because always topmost card & nrOfcardPlayerx and next turn called
         informPlayers_TopMostCard(game,game.getDiscardPile().getTopmostCard());
         informPlayers_nrOfCardsInHandPlayerX(player, game);
+        informPlayerOnHand(player, game);
+        //check win
+        if (player.getHand().getCardCount() == 0) {
+            handleWin(game, player);
+        }
         informPlayerToTurn(game);
+
+
+
+    }
+
+    private void handleUno(Game game, Player player, boolean uno) {
+        if(uno){
+            if(checkUnoCanBeCalled(player)) {
+                player.setHasSaidUno(true);
+                UserGetDTO userGetDTO = new UserGetDTO();
+                userGetDTO.setUsername(player.getUser().getUsername());
+                messageService.sendToGame(game.getGameId(),"saidUno", userGetDTO);
+            }
+        } else {
+            player.setHasSaidUno(false);
+        }
+
+
+    }
+
+    private void handleWin(Game game, Player player) {
+        /*
+        When you are out of cards, you get points for cards left in opponents’ hands as follows:
+        All cards through 9 Face Value
+        Reverse 20 Points
+        Skip 20 Points
+        Hit 2 20 Points
+        Discard All 30 Points
+        Wild 50 Points
+        Extreme Hit 50 Points
+        The WINNER is the first player to reach 500 points. However, the game may be scored by
+        keeping a running total of the points each player is caught with at the end of each hand.
+        When one player reaches 500 points, the player with the lowest points is the winner.
+         */
+        //calculate score
+        int score = 0;
+        for(Player p : game.getPlayers()) {
+            for(Card card : p.getHand().getCards()) {
+                score += card.getSymbol().getScore();
+            }
+        }
+
+        //set score
+        int oldScore = player.getScore();
+        player.setScore(oldScore+score);
+        gameRepository.saveAndFlush(game);
+        //send scores to players
+        List<ScoreDTO> scoreDTOS = new ArrayList<>();
+        for(Player p : game.getPlayers()) {
+            ScoreDTO scoreDTO = new ScoreDTO();
+            scoreDTO.setUsername(p.getUser().getUsername());
+            scoreDTO.setScore(p.getScore());
+            scoreDTOS.add(scoreDTO);
+        }
+
+        messageService.sendToGame(game.getGameId(), "score", scoreDTOS);
+    }
+
+    private void informPlayerOnHand(Player player, Game game) {
         List<CardDTO> playerHand = new ArrayList<>();
         for(Card playerCard: player.getHand().getCards()) {
             playerHand.add(DTOMapper.INSTANCE.convertCardToCardDTO(playerCard));
         }
         messageService.sendToUser(player.getUser().getPrincipalName(),game.getGameId()+"/playedCard", playerHand);
-
-
-
     }
 
     private void handleReverse(Game game, Player player, Card card) {
@@ -185,7 +245,7 @@ public class GameService {
         game.getDiscardPile().discardCard(card);
         game.nextTurn();
         // send drawn cards
-        messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS1);
+        //messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS1);
         game.nextTurn();
         game.nextTurn();
     }
@@ -255,7 +315,7 @@ public class GameService {
         }
         List<CardDTO> cardDTOS = playerDrawsCard(game, victim);
         //send drawed cards to player
-        messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS);
+        //messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS);
 
         game.nextTurn();
     }
@@ -421,8 +481,10 @@ public class GameService {
 
         int max = Globals.maxDrawCount();
         int min = Globals.minDrawCount();
+        int[] distribution = {0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,5,5,5,6,6,7,7,8,9,10,11,12};
+
         //int randomCardAmount = (int) ((Math.random() * (max - min)) + min);
-        int randomCardAmount = random.nextInt(max);
+        int randomCardAmount = distribution[random.nextInt(distribution.length)];
 
         List<CardDTO> cardDTOS = new ArrayList<>();
         for(int i=0; i< randomCardAmount;i++) {

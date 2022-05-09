@@ -16,8 +16,14 @@ public class Hand implements Serializable {
 
     public boolean containsCard(Card card) {
         for(Card handCard: hand) {
-            if(handCard.getSymbol() == card.getSymbol() && handCard.getColor() == card.getColor()) {
-                return true;
+            if (handCard.getSymbol() == card.getSymbol()) {
+
+                if (handCard.getColor() == card.getColor()) {
+                    return true;
+                }
+                if (handCard.getSymbol() == Symbol.WILDCARD || handCard.getSymbol() == Symbol.EXTREME_HIT) {
+                    return true;
+                }
             }
         }
         return false;

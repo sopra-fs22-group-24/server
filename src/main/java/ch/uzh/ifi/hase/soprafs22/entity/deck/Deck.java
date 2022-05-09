@@ -3,7 +3,19 @@ package ch.uzh.ifi.hase.soprafs22.entity.deck;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Vector;
-
+/*
+Deck content:
+18 Blue cards - 1 to 9
+18 Green cards - 1 to 9
+18 Red cards - 1 to 9
+18 Yellow cards - 1 to 9
+8 Hit 2 cards - 2 each in blue, green, red and yellow
+8 Reverse cards - 2 each in blue, green, red and yellow
+8 Skip cards - 2 each in blue, green, red and yellow
+8 Discard All cards - 2 each in blue, green, red and yellow
+4 Wild cards
+4 Extreme Hit cards
+ */
 public class Deck implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -14,8 +26,17 @@ public class Deck implements Serializable {
         this.deck = new Vector<>();
         // initialize deck
         for(Color color: Color.values() ) {
+            if (color == Color.NULL) {
+                continue;
+            }
             for(Symbol symbol: Symbol.values()) {
-                deck.add(new Card(color, symbol));
+                if (symbol == Symbol.WILDCARD || symbol == Symbol.EXTREME_HIT) {
+                    deck.add(new Card(Color.NULL, symbol));
+                }
+                else {
+                    deck.add(new Card(color, symbol));
+                    deck.add(new Card(color, symbol));
+                }
             }
         }
         Collections.shuffle(deck);

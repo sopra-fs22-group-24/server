@@ -4,8 +4,11 @@ import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
+import org.hibernate.mapping.Any;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +58,27 @@ public class UserController {
     return DTOMapper.INSTANCE.convertEntityToUserGetTokenDTO(createdUser);
   }
 
+    @PostMapping("/users/{id}/picture")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public PictureDTO setProfilePicture(@RequestBody PictureDTO pictureDTO, @PathVariable("userId") long id) {
+       String endcodedString= pictureDTO.getPicture();
+        String savedImage = userService.setProfilePicture(id,endcodedString);
+        PictureDTO pictureDTO1 = new PictureDTO();
+        pictureDTO1.setPicture(savedImage);
+        return pictureDTO1;
+    }
+
+    @GetMapping(value = "/users/{id}/picture")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public PictureDTO getProfilePicture(@PathVariable("userId") long id) {
+                String picture = userService.getProfilePicture(id);
+                PictureDTO pictureDTO= new PictureDTO();
+                pictureDTO.setPicture(picture);
+                return pictureDTO;
+
+    }
     @GetMapping(value = "/users/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
