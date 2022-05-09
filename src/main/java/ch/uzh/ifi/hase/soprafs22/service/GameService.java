@@ -245,7 +245,11 @@ public class GameService {
         game.getDiscardPile().discardCard(card);
         game.nextTurn();
         // send drawn cards
-        //messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS1);
+        List<CardDTO> cardDTOS = new ArrayList<>();
+        for(Card playerCard: player.getHand().getCards()) {
+            cardDTOS.add(DTOMapper.INSTANCE.convertCardToCardDTO(playerCard));
+        }
+        messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS);
         game.nextTurn();
         game.nextTurn();
     }
@@ -313,7 +317,12 @@ public class GameService {
         } catch(NullPointerException e) {
             throw new PlayerNotInGameException();
         }
-        List<CardDTO> cardDTOS = playerDrawsCard(game, victim);
+        playerDrawsCard(game, victim);
+        List<CardDTO> cardDTOS = new ArrayList<>();
+        for(Card playerCard: player.getHand().getCards()) {
+            cardDTOS.add(DTOMapper.INSTANCE.convertCardToCardDTO(playerCard));
+        }
+        messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS);
         //send drawed cards to player
         //messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS);
 

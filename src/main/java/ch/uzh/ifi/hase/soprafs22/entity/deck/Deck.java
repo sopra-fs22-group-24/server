@@ -50,6 +50,11 @@ public class Deck implements Serializable {
     public void shuffle(Vector<Card> discardedCards) {
         Collections.shuffle(discardedCards);
         deck = discardedCards;
+        for (Card card: deck) {
+            if(card.getSymbol() == Symbol.WILDCARD || card.getSymbol() == Symbol.EXTREME_HIT) {
+                card.setColor(Color.NULL);
+            }
+        }
     }
 
     /*

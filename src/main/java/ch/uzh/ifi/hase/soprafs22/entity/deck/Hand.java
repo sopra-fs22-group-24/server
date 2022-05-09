@@ -34,10 +34,17 @@ public class Hand implements Serializable {
         for(int i=0; i<hand.size();i++) {
 
             Card handCard = hand.get(i);
-            if (handCard.getSymbol() == card.getSymbol() && handCard.getColor() == card.getColor()) {
-                hand.remove(i);
-                return;
+            if (handCard.getSymbol() == card.getSymbol()) {
+                if(handCard.getSymbol() == Symbol.WILDCARD || handCard.getSymbol() == Symbol.EXTREME_HIT) {
+                    hand.remove(handCard);
+                    return;
+                }
+                else if (handCard.getColor() == card.getColor()) {
+                    hand.remove(i);
+                    return;
+                }
             }
+
         }
     }
 
