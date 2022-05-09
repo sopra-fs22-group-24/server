@@ -61,15 +61,23 @@ public class UserController {
     @PostMapping("/users/{id}/picture")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public void setProfilePicture(@RequestBody MultipartFile file, @PathVariable("userId") long id) {
-        userService.setProfilePicture(id,file);
+    public PictureDTO setProfilePicture(@RequestBody PictureDTO pictureDTO, @PathVariable("userId") long id) {
+       String endcodedString= pictureDTO.getPicture();
+        String savedImage = userService.setProfilePicture(id,endcodedString);
+        PictureDTO pictureDTO1 = new PictureDTO();
+        pictureDTO1.setPicture(savedImage);
+        return pictureDTO1;
     }
 
     @GetMapping(value = "/users/{id}/picture")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public byte[] getProfilePicture(@PathVariable("id") long id) {
-        return userService.getProfilePicture(id);
+    public PictureDTO getProfilePicture(@PathVariable("userId") long id) {
+                String picture = userService.getProfilePicture(id);
+                PictureDTO pictureDTO= new PictureDTO();
+                pictureDTO.setPicture(picture);
+                return pictureDTO;
+
     }
     @GetMapping(value = "/users/{id}")
     @ResponseStatus(HttpStatus.OK)

@@ -143,18 +143,16 @@ public class UserService {
         log.debug("updated token for User: {}",user);
         return user;
     }
-    public  void setProfilePicture (long id, MultipartFile file) {
+    public  String setProfilePicture (long id, String encodedstring) {
         User user = getUserById(id);
-        try {
-            user.setPicture(file.getBytes());
-        }
-        catch (IOException e) {
-            throw new RuntimeException("profilpicture could npt be read in backend",e);
-        }
-        userRepository.save(user);
+
+            user.setPicture(encodedstring);
+
+        userRepository.saveAndFlush(user);
+        return encodedstring;
     }
 
-    public byte[] getProfilePicture(long id){
+    public String getProfilePicture(long id){
         User user = getUserById(id);
         return user.getPicture();
     }

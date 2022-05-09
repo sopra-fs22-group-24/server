@@ -49,15 +49,15 @@ public class User implements Serializable {
     @Column()
     private String principalName;
 
-    @Lob
-    @Column(name = "picture",nullable = true)
-    private byte [] picture;
 
-    public byte[] getPicture() {
+    @Column(name = "picture",nullable = true)
+    private String picture;
+
+    public String getPicture() {
         return picture;
     }
 
-    public void setPicture(byte[] profilpicture) {
+    public void setPicture(String profilpicture) {
         this.picture = profilpicture;
     }
     public Long getId() {
