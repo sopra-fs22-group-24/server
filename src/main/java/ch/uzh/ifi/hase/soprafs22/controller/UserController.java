@@ -61,7 +61,7 @@ public class UserController {
     @PostMapping("/users/{id}/picture")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public PictureDTO setProfilePicture(@RequestBody PictureDTO pictureDTO, @PathVariable("userId") long id) {
+        public PictureDTO setProfilePicture(@RequestBody PictureDTO pictureDTO, @PathVariable("id") long id) {
        String endcodedString= pictureDTO.getPicture();
         String savedImage = userService.setProfilePicture(id,endcodedString);
         PictureDTO pictureDTO1 = new PictureDTO();
@@ -72,7 +72,7 @@ public class UserController {
     @GetMapping(value = "/users/{id}/picture")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public PictureDTO getProfilePicture(@PathVariable("userId") long id) {
+    public PictureDTO getProfilePicture(@PathVariable("id") long id) {
                 String picture = userService.getProfilePicture(id);
                 PictureDTO pictureDTO= new PictureDTO();
                 pictureDTO.setPicture(picture);
@@ -112,10 +112,10 @@ public class UserController {
 
     }
 
-    @PutMapping("/users/{userId}")
+    @PutMapping("/users/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
-    public void updateUserInfo(@RequestBody UserPutDTO userPutDTO, @PathVariable("userId") long id) {
+    public void updateUserInfo(@RequestBody UserPutDTO userPutDTO, @PathVariable("id") long id) {
     // converto to entitiy
         User userinput = DTOMapper.INSTANCE.convertUserPutDTOToEntity(userPutDTO);
 

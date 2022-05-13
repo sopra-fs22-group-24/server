@@ -2,10 +2,7 @@ package ch.uzh.ifi.hase.soprafs22.controller;
 
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetTokenDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostTokenDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -303,7 +300,7 @@ public class UserControllerTest {
         mockMvc.perform(putRequest)
                 .andExpect(status().isNoContent());
     }
-/*    @Test
+    @Test
     public void GetProfilePicture_sucess() throws Exception{
         String returnvalue = "helloworl";
         PictureDTO pictureDTO = new PictureDTO();
@@ -311,15 +308,13 @@ public class UserControllerTest {
         //mock service
         Mockito.when(userService.getProfilePicture(8L)).thenReturn(returnvalue);
         //build request
-        MockHttpServletRequestBuilder getRequest = get("/users/8/picture")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(pictureDTO));
+        MockHttpServletRequestBuilder getRequest = get("/users/8/picture");
         // then send request and verify
         mockMvc.perform(getRequest)
                 .andExpect(jsonPath("$.picture", is(returnvalue)));
-    }*/
+    }
 
-    /*@Test
+    @Test
     public void GetProfilePicture_Throws_usernotfound() throws Exception{
         //mock service
         Mockito.when(userService.getProfilePicture(8L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -328,9 +323,9 @@ public class UserControllerTest {
         // then send request and verify
         mockMvc.perform(getRequest)
                 .andExpect(status().isNotFound());
-    }*/
+    }
 
-    /*@Test void SetprofilePicture_invalidUserid() throws Exception{
+    @Test void SetprofilePicture_invalidUserid() throws Exception{
         String returnvalue = "helloworl";
         PictureDTO pictureDTO = new PictureDTO();
         pictureDTO.setPicture(returnvalue);
@@ -343,8 +338,8 @@ public class UserControllerTest {
 
         mockMvc.perform(postRequest).andExpect(status().isNotFound());
 
-    }*/
- /*   @Test void SetprofilePicture_sucess() throws Exception{
+    }
+   @Test void SetprofilePicture_sucess() throws Exception{
         String returnvalue = "helloworl";
         PictureDTO pictureDTO = new PictureDTO();
         pictureDTO.setPicture(returnvalue);
@@ -355,10 +350,10 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(pictureDTO));
 
-        mockMvc.perform(postRequest).andExpect(status().isNotFound())
+        mockMvc.perform(postRequest).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.picture", is(returnvalue)));
 
-    }*/
+    }
 
     /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
