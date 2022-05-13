@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs22.controller;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
+import ch.uzh.ifi.hase.soprafs22.entity.deck.Symbol;
 import ch.uzh.ifi.hase.soprafs22.repository.LobbyRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.LobbyPostDTO;
@@ -26,6 +27,8 @@ import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.*;
@@ -169,8 +172,8 @@ class LobbyControllerIntegrationTest {
         //Setup
         BlockingQueue<LobbyPostDTO> blockingQueue = new LinkedBlockingDeque<>();
         BlockingQueue<LobbyPostDTO> blockingQueue2 = new LinkedBlockingDeque<>();
-        BlockingQueue<UserGetDTO> blockingQueue3 = new LinkedBlockingDeque<>();
-        BlockingQueue<UserGetDTO> blockingQueue4 = new LinkedBlockingDeque<>();
+        BlockingQueue<List<UserGetDTO>> blockingQueue3 = new LinkedBlockingDeque<>();
+        BlockingQueue<List<UserGetDTO>> blockingQueue4 = new LinkedBlockingDeque<>();
 
 
         String token1 = "token3";
@@ -215,12 +218,26 @@ class LobbyControllerIntegrationTest {
         session.subscribe("/lobby/" + dto.getLobbyId() + "/userJoined", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return UserGetDTO.class;
+                System.out.println("oi");
+                return List.class;
+                //return Object.class;
             }
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                blockingQueue4.add((UserGetDTO) payload);
+                System.out.println("oi2");
+                ArrayList<UserGetDTO> userGetDTOS = new ArrayList<>();
+                for(LinkedHashMap o: (List<LinkedHashMap>) payload) {
+                    System.out.println("oi");
+                    System.out.println(o);
+                    UserGetDTO userGetDTO = new UserGetDTO();
+                    Long.valueOf((int) o.get("id"));
+                    userGetDTO.setId(Long.valueOf((int) o.get("id")));
+                    userGetDTO.setUsername((String) o.get("username"));
+                    userGetDTOS.add(userGetDTO);
+                }
+                blockingQueue3.add(userGetDTOS);
+                return ;
 
             }
         });
@@ -245,29 +262,41 @@ class LobbyControllerIntegrationTest {
         session2.subscribe("/lobby/" + dto.getLobbyId() + "/userJoined", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return UserGetDTO.class;
+                return List.class;
+                //return Object.class;
             }
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                blockingQueue3.add((UserGetDTO) payload);
-
+                System.out.println("hello");
+                System.out.println(payload);
+                ArrayList<UserGetDTO> userGetDTOS = new ArrayList<>();
+                for(LinkedHashMap o: (List<LinkedHashMap>) payload) {
+                    System.out.println("oi");
+                    System.out.println(o);
+                    UserGetDTO userGetDTO = new UserGetDTO();
+                    Long.valueOf((int) o.get("id"));
+                    userGetDTO.setId(Long.valueOf((int) o.get("id")));
+                    userGetDTO.setUsername((String) o.get("username"));
+                    userGetDTOS.add(userGetDTO);
+                }
+                blockingQueue4.add(userGetDTOS);
             }
         });
         blockingQueue.poll(1, SECONDS);
 
         session2.send("/app/lobby/"+dto.getLobbyId()+"/joinLobby", dto);
         LobbyPostDTO dto2 = blockingQueue2.poll(1, SECONDS);
-        UserGetDTO userDto = blockingQueue3.poll(1,SECONDS);
-        UserGetDTO userDto2 = blockingQueue4.poll(1, SECONDS);
+        List<UserGetDTO> userGetDTOS = blockingQueue3.poll(1,SECONDS);
+        List<UserGetDTO> userGetDTOS2 = blockingQueue4.poll(1, SECONDS);
         Lobby receivedLobby = lobbyRepository.findByLobbyId(dto.getLobbyId());
         assertNotNull(receivedLobby.getLobbyId(), "lobbyId is null");
         Vector<User> players = receivedLobby.getPlayers();
         assertEquals(dto.getLobbyId(), dto2.getLobbyId(), "different lobby ids received");
         assertEquals(players.get(0).getId(), user1.getId(), "user1 is not in lobby");
         assertEquals(players.get(1).getId(),user2.getId(), "user2 is not in lobby");
-        assertEquals(players.get(1).getId(), userDto.getId(), "dto id not the same as player dto");
-        assertEquals(userDto.getUsername(), userDto2.getUsername(), "players got different messages");
+        assertEquals(players.get(1).getId(), userGetDTOS.get(1).getId(), "dto id not the same as player dto");
+        assertEquals(userGetDTOS.get(1).getUsername(), userGetDTOS2.get(1).getUsername(), "players got different messages");
 
 
     }

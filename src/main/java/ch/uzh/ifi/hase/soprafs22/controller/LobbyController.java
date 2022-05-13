@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 import ch.uzh.ifi.hase.soprafs22.entity.Lobby;
+import ch.uzh.ifi.hase.soprafs22.entity.Player;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.GameException;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.LobbyGetDTO;
@@ -80,9 +81,13 @@ public class LobbyController {
         messageService.sendToUser(user.getPrincipalName(),"joinLobby",returnDto);
         UserGetDTO userDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
 
-        //Inform lobby
-
-        messageService.sendToLobby(lobby.getLobbyId(), "userJoined",userDTO);
+        //Inform lobby of users
+        List<UserGetDTO> userGetDTOS = new ArrayList<>();
+        for(User u: lobby.getPlayers()) {
+            UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(u);
+            userGetDTOS.add(userGetDTO);
+        }
+        messageService.sendToLobby(lobby.getLobbyId(), "userJoined",userGetDTOS);
         log.info("/joinLobby. User {} joined lobby id {}", user.getUsername(),lobby.getLobbyId());
 
     }

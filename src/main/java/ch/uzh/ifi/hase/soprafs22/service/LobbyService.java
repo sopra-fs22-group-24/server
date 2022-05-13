@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 
+import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.entity.Lobby;
+import ch.uzh.ifi.hase.soprafs22.entity.Player;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.UserAlreadyInLobbyException;
@@ -92,4 +94,11 @@ public class LobbyService {
         UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
         messageService.sendToLobby(lobby.getLobbyId(),"userLeft", userGetDTO);
     }
-}
+
+    private void changePrincipal(User user, Player player, Lobby lobby) {
+        if(user.getPrincipalName().equals(player.getUser().getPrincipalName())) {
+            return;
+        }
+        player.getUser().setPrincipalName(user.getPrincipalName());
+        lobbyRepository.saveAndFlush(lobby);
+    }}

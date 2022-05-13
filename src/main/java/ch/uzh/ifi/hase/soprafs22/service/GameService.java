@@ -246,7 +246,7 @@ public class GameService {
         game.nextTurn();
         // send drawn cards
         List<CardDTO> cardDTOS = new ArrayList<>();
-        for(Card playerCard: player.getHand().getCards()) {
+        for(Card playerCard: victim.getHand().getCards()) {
             cardDTOS.add(DTOMapper.INSTANCE.convertCardToCardDTO(playerCard));
         }
         messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS);
@@ -319,7 +319,7 @@ public class GameService {
         }
         playerDrawsCard(game, victim);
         List<CardDTO> cardDTOS = new ArrayList<>();
-        for(Card playerCard: player.getHand().getCards()) {
+        for(Card playerCard: victim.getHand().getCards()) {
             cardDTOS.add(DTOMapper.INSTANCE.convertCardToCardDTO(playerCard));
         }
         messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS);
