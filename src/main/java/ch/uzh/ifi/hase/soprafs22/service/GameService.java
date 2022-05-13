@@ -560,4 +560,25 @@ public class GameService {
         messageService.sendToUser(calledOutPlayer.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTO);
 
     }
+
+    public void updateUser(User user) {
+        Game game = gameRepository.findByPlayers(user);
+        if(game == null) {
+            return;
+        }
+        for(Player savedPlayer: game.getPlayers()) {
+            if(user.getId().equals(savedPlayer.getUser().getId())) {
+                updatePrincipalName(game,savedPlayer, user);
+            }
+        }
+    }
+
+    private void updatePrincipalName(Game lobby,Player savedUser, User newUser) {
+        if(!(savedUser.getUser().getPrincipalName().equals(newUser.getPrincipalName()))) {
+            String oldPrincipal = savedUser.getUser().getPrincipalName();
+            savedUser.getUser().setPrincipalName(newUser.getPrincipalName());
+            gameRepository.saveAndFlush(lobby);
+            log.info("updated user {}. Set principal name from {} to {}", savedUser.getUser().getUsername(), oldPrincipal, savedUser.getUser().getPrincipalName());
+        }
+    }
 }

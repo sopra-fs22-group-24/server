@@ -2,6 +2,8 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
 import ch.uzh.ifi.hase.soprafs22.entity.User;
+//import ch.uzh.ifi.hase.soprafs22.service.GameService;
+import ch.uzh.ifi.hase.soprafs22.service.LobbyService;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,10 @@ public class HandshakeHandler extends DefaultHandshakeHandler {
     // Custom class for storing principal
     @Autowired
     UserService userService;
+    @Autowired
+    LobbyService lobbyService;
+    //@Autowired
+    //GameService gameService;
     private final Logger log = LoggerFactory.getLogger(HandshakeHandler.class);
     @Override
     protected Principal determineUser(ServerHttpRequest request,
@@ -49,7 +55,10 @@ public class HandshakeHandler extends DefaultHandshakeHandler {
             log.warn("error user not found for ws {} and token {}",principal.getName(), token);
             return;
         }
+        //Update users in lobby and game
         userService.addPrincipalName(user, principal.getName());
+        lobbyService.updateUser(user);
+        //gameService.updateUser(user);
         log.info("User {} joined via ws {}", user.getUsername(), principal.getName());
 
 
