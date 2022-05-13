@@ -8,7 +8,7 @@ public class LobbyGetDTO {
 
     private Long lobbyId;
     private Vector<User> players;
-
+    private int maxSize;
 
     public Long getLobbyId() {
         return lobbyId;
@@ -24,5 +24,13 @@ public class LobbyGetDTO {
 
     public void setPlayers(Vector<User> players) {
         this.players = players;
+    }
+
+    public void setMaxSize(int maxSize) {
+        this.maxSize = maxSize;
+    }
+
+    public int getMaxSize() {
+        return maxSize;
     }
 }

@@ -66,9 +66,9 @@ class GameControllerIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        userRepository.deleteAll();
-        lobbyRepository.deleteAll();
         gameRepository.deleteAll();
+        lobbyRepository.deleteAll();
+        userRepository.deleteAll();
 
         this.webSocketStompClient = new WebSocketStompClient(new SockJsClient(
                 List.of(new WebSocketTransport(new StandardWebSocketClient()))));

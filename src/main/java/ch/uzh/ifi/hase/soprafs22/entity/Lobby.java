@@ -3,6 +3,8 @@ package ch.uzh.ifi.hase.soprafs22.entity;
 
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 @Entity
@@ -14,15 +16,18 @@ public class Lobby {
     @GeneratedValue
     Long lobbyId;
 
-    @Column(nullable = false, length = 32768)
-    Vector<User> players;
+    @Column(nullable = false)
+    int maxSize;
+    //@Column(nullable = false, length = 32768)
+    @ManyToMany(targetEntity = User.class, fetch = FetchType.EAGER)
+    List<User> players;
 
     //@Column(nullable = true)
     @OneToOne
     Game game;
 
     public Lobby() {
-        players = new Vector<>();
+        players = new ArrayList<>();
     }
 
     public Long getLobbyId() {
@@ -33,11 +38,11 @@ public class Lobby {
         this.lobbyId = lobbyId;
     }
 
-    public Vector<User> getPlayers() {
+    public List<User> getPlayers() {
         return players;
     }
 
-    public void setPlayers(Vector<User> players) {
+    public void setPlayers(List<User> players) {
         this.players = players;
     }
 
@@ -80,5 +85,13 @@ public class Lobby {
         long id1 = user.getId();
         long id2 = admin.getId();
         return id1==id2;
+    }
+
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    public void setMaxSize(int maxSize) {
+        this.maxSize = maxSize;
     }
 }

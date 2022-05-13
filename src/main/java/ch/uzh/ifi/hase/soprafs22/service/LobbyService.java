@@ -34,9 +34,10 @@ public class LobbyService {
         this.messageService = messageService;
     }
 
-    public Lobby createLobby(User user) {
+    public Lobby createLobby(User user, int maxSize) {
         Lobby newLobby = new Lobby();
         newLobby.addUser(user);
+        newLobby.setMaxSize(maxSize);
 
         Lobby createdLobby = lobbyRepository.save(newLobby);
         lobbyRepository.flush();
@@ -101,4 +102,26 @@ public class LobbyService {
         }
         player.getUser().setPrincipalName(user.getPrincipalName());
         lobbyRepository.saveAndFlush(lobby);
-    }}
+    }
+
+    public void updateUser(User user) {
+        Lobby lobby = lobbyRepository.findByPlayers(user);
+        if(lobby == null) {
+            return;
+        }
+        for(User savedUser: lobby.getPlayers()) {
+            if(user.getId().equals(savedUser.getId())) {
+                updatePrincipalName(lobby,savedUser, user);
+            }
+        }
+    }
+
+    private void updatePrincipalName(Lobby lobby,User savedUser, User newUser) {
+        if(!(savedUser.getPrincipalName().equals(newUser.getPrincipalName()))) {
+            String oldPrincipal = savedUser.getPrincipalName();
+            savedUser.setPrincipalName(newUser.getPrincipalName());
+            lobbyRepository.saveAndFlush(lobby);
+            log.info("updated user {}. Set principal name from {} to {}", savedUser.getUsername(), oldPrincipal, savedUser.getPrincipalName());
+        }
+    }
+}
