@@ -144,7 +144,7 @@ public class GameService {
         gameRepository.saveAndFlush(game);
         //update the player/players State here because always topmost card & nrOfcardPlayerx and next turn called
         informPlayers_TopMostCard(game,game.getDiscardPile().getTopmostCard());
-        informPlayers_nrOfCardsInHandPlayerX(player, game);
+        informPlayers_nrOfCardsInHandPlayers(game);
         informPlayerOnHand(player, game);
         //check win
         if (player.getHand().getCardCount() == 0) {
@@ -414,16 +414,17 @@ public class GameService {
         Card topMostCard = game.getDiscardPile().getTopmostCard();
         CardDTO topMostCardDTO = DTOMapper.INSTANCE.convertCardToCardDTO(topMostCard);
         messageService.sendToGame(gameId, "topMostCard", topMostCardDTO);
-
+        informPlayers_nrOfCardsInHandPlayers(game);
         // send cards to specific players and number of cards to all players
         for(Player player: game.getPlayers()) {
             Hand hand = player.getHand();
             // Send nCards to all players
+            /*
             NCardsDTO nCardsDTO = new NCardsDTO();
             nCardsDTO.setUsername(player.getUser().getUsername());
             nCardsDTO.setnCards(hand.getCardCount());
             messageService.sendToGame(gameId, "playerHasNCards", nCardsDTO);
-
+            */
             //send cards to specific player
             List<CardDTO> cardDTOS = new ArrayList<>();
             for(Card card : hand.getCards()) {
@@ -515,12 +516,16 @@ public class GameService {
         messageService.sendToGame(game.getGameId(), "topMostCard",cardDTO);
     }
     //update nrOfCardsInHand for other players after player played a card
-    private void informPlayers_nrOfCardsInHandPlayerX(Player player, Game game){
-        NCardsDTO nCardsDTO = new NCardsDTO();
-        nCardsDTO.setUsername(player.getUser().getUsername());
-        nCardsDTO.setnCards(player.getHand().getCardCount());
+    private void informPlayers_nrOfCardsInHandPlayers(Game game){
+        List<NCardsDTO> nCardsDTOS = new ArrayList<>();
+        for(Player player: game.getPlayers()) {
+            NCardsDTO nCardsDTO = new NCardsDTO();
+            nCardsDTO.setUsername(player.getUser().getUsername());
+            nCardsDTO.setnCards(player.getHand().getCardCount());
+            nCardsDTOS.add(nCardsDTO);
+        }
         Long gameId = game.getGameId();
-        messageService.sendToGame(gameId, "playerHasNCards", nCardsDTO);
+        messageService.sendToGame(gameId, "playerHasNCards", nCardsDTOS);
     }
     // informPlayersTurn
     private void informPlayerToTurn(Game game){
@@ -546,7 +551,7 @@ public class GameService {
         cardDTO.addAll(playerDrawsCard(game, calledOutPlayer));
 
         gameRepository.saveAndFlush(game);
-        informPlayers_nrOfCardsInHandPlayerX(calledOutPlayer, game);
+        informPlayers_nrOfCardsInHandPlayers(game);
 
         CalledOutDTO calledOutDTO = new CalledOutDTO();
         calledOutDTO.setCallee(player.getUser().getUsername());

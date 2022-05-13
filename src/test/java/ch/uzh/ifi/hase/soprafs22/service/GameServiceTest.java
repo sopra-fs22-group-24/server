@@ -185,7 +185,7 @@ public class GameServiceTest {
         hand.addCard(card2);
 
         player1.setHand(hand);
-
+        player2.setHand(new Hand());
         Vector<Player> players = new Vector<>();
         players.add(player1);
         players.add(player2);
@@ -292,7 +292,8 @@ public class GameServiceTest {
         hand.addCard(card2);
 
         player1.setHand(hand);
-
+        player2.setHand(new Hand());
+        player3.setHand(new Hand());
         Vector<Player> players = new Vector<>();
         players.add(player1);
         players.add(player2);
@@ -1301,6 +1302,7 @@ public class GameServiceTest {
         game.setDeck(deck);
         game.setDiscardPile(discardPile);
         game.setPlayers(players);
+        game.setGameId(1L);
         // TODO spy messageservice and verify invokations otherwise this test doesnt make sense :D
        // Mockito.spy(messageService)
         //mock repo
