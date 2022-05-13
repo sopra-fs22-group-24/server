@@ -3,6 +3,7 @@ import ch.uzh.ifi.hase.soprafs22.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs22.entity.Player;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.GameException;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.CreateLobbyDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.LobbyGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.LobbyPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
@@ -42,9 +43,10 @@ public class LobbyController {
     @PostMapping("/lobby")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public LobbyPostDTO createLobby(@RequestHeader("Authorization") String token) {
+    public LobbyPostDTO createLobby(@RequestHeader("Authorization") String token, CreateLobbyDTO createLobbyDTO) {
         User user = userService.authenticateUser(token);
-        Lobby lobby = lobbyService.createLobby(user);
+        int maxSize = createLobbyDTO.getMaxSize();
+        Lobby lobby = lobbyService.createLobby(user, maxSize);
         return DTOMapper.INSTANCE.convertEntityToLobbyPostDTO(lobby);
     }
 
@@ -93,13 +95,13 @@ public class LobbyController {
     }
 
     @MessageMapping("/createLobby")
-    public void createLobby(StompHeaderAccessor accessor) {
+    public void createLobby(StompHeaderAccessor accessor,CreateLobbyDTO createLobbyDTO) {
 
         // authorize User
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+        int maxSize = createLobbyDTO.getMaxSize();
 
-
-        Lobby lobby = lobbyService.createLobby(user);
+        Lobby lobby = lobbyService.createLobby(user,maxSize);
         LobbyPostDTO dto = DTOMapper.INSTANCE.convertEntityToLobbyPostDTO(lobby);
         messageService.sendToUser(user.getPrincipalName(), "joinLobby", dto);
         log.info("created Lobby {} for {}",lobby.getLobbyId(),user.getUsername());

@@ -12,7 +12,7 @@ public class Player implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @OneToOne(targetEntity = User.class)
+    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     User user;
 
     @Column()

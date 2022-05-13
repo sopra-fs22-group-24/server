@@ -16,6 +16,8 @@ public class Lobby {
     @GeneratedValue
     Long lobbyId;
 
+    @Column(nullable = false)
+    int maxSize;
     //@Column(nullable = false, length = 32768)
     @ManyToMany(targetEntity = User.class, fetch = FetchType.EAGER)
     List<User> players;
@@ -83,5 +85,13 @@ public class Lobby {
         long id1 = user.getId();
         long id2 = admin.getId();
         return id1==id2;
+    }
+
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    public void setMaxSize(int maxSize) {
+        this.maxSize = maxSize;
     }
 }

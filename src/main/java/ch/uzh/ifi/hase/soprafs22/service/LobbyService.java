@@ -34,9 +34,10 @@ public class LobbyService {
         this.messageService = messageService;
     }
 
-    public Lobby createLobby(User user) {
+    public Lobby createLobby(User user, int maxSize) {
         Lobby newLobby = new Lobby();
         newLobby.addUser(user);
+        newLobby.setMaxSize(maxSize);
 
         Lobby createdLobby = lobbyRepository.save(newLobby);
         lobbyRepository.flush();

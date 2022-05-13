@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.entity.deck.Symbol;
 import ch.uzh.ifi.hase.soprafs22.repository.LobbyRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.CreateLobbyDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.LobbyPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
@@ -157,7 +158,9 @@ class LobbyControllerIntegrationTest {
         });
 
         //wait for subscription
-        session.send("/app/createLobby","");
+        CreateLobbyDTO createLobbyDTO = new CreateLobbyDTO();
+        createLobbyDTO.setMaxSize(4);
+        session.send("/app/createLobby",createLobbyDTO);
         LobbyPostDTO dto = blockingQueue.poll(1, SECONDS);
         assertNotNull(dto.getLobbyId(), "lobbyId is null");
         Lobby createdLobby = lobbyRepository.findByLobbyId(dto.getLobbyId());
@@ -213,7 +216,9 @@ class LobbyControllerIntegrationTest {
 
 
         //wait for subscription
-        session.send("/app/createLobby","");
+        CreateLobbyDTO createLobbyDTO = new CreateLobbyDTO();
+        createLobbyDTO.setMaxSize(4);
+        session.send("/app/createLobby",createLobbyDTO);
         LobbyPostDTO dto = blockingQueue.poll(1, SECONDS);
         session.subscribe("/lobby/" + dto.getLobbyId() + "/userJoined", new StompFrameHandler() {
             @Override
