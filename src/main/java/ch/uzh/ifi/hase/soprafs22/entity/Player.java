@@ -23,6 +23,7 @@ public class Player implements Serializable {
 
     @Column
     int score;
+
     public User getUser() {
         return user;
     }
@@ -53,5 +54,16 @@ public class Player implements Serializable {
 
     public int getScore() {
         return score;
+    }
+
+    public boolean equals(Object o) {
+
+        Player otherPlayer = (Player) o;
+        if (this.getUser().getId().equals(otherPlayer.getUser().getId())) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }

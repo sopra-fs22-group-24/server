@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface LobbyRepository extends JpaRepository<Lobby, Long> {
     public Lobby findByLobbyId(long lobbyId);
 
-    public Lobby findByPlayers(User user);
+    public Lobby findByPlayersContaining(User user);
 }

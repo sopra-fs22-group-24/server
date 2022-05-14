@@ -305,5 +305,59 @@ class LobbyControllerIntegrationTest {
 
 
     }
+    @Test
+    public void whenCallingCreateLobbyEndpointTwice_thenNewLobbyIsCreatedAndPlayerIsRemovedOutOfTheOldOne() throws InterruptedException {
 
+        BlockingQueue<LobbyPostDTO> blockingQueue = new LinkedBlockingDeque<>();
+        //webSocketStompClient.setMessageConverter(new StringMessageConverter());
+
+        String token = "token5";
+
+        User user = new User();
+        user.setUsername("test5");
+        user.setPassword("test5");
+        user.setStatus(UserStatus.ONLINE);
+        user.setToken(token);
+
+
+        userRepository.save(user);
+        userRepository.flush();
+        StompSession session = connectWebsocket(token);
+        //wait for connection
+        blockingQueue.poll(1, SECONDS);
+
+        session.subscribe("/users/queue/joinLobby", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return LobbyPostDTO.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                blockingQueue.add((LobbyPostDTO) payload);
+            }
+        });
+
+        //wait for subscription
+        CreateLobbyDTO createLobbyDTO = new CreateLobbyDTO();
+        createLobbyDTO.setMaxSize(4);
+        session.send("/app/createLobby",createLobbyDTO);
+        LobbyPostDTO preDTO = blockingQueue.poll(1, SECONDS);
+        //Sanity check
+        Lobby preLobby = lobbyRepository.findByLobbyId(preDTO.getLobbyId());
+        assertEquals(preLobby.getLobbyId(), preDTO.getLobbyId());
+
+        session.send("/app/createLobby", createLobbyDTO);
+        LobbyPostDTO dto = blockingQueue.poll(1, SECONDS);
+
+        assertNotNull(dto.getLobbyId(), "lobbyId is null");
+        Lobby createdLobby = lobbyRepository.findByLobbyId(dto.getLobbyId());
+        Lobby oldLobby = lobbyRepository.findByLobbyId(preDTO.getLobbyId());
+        assertNull(oldLobby, "old lobby wasn't deleted");
+        List<User> players = createdLobby.getPlayers();
+        assertEquals(user.getId(), players.get(0).getId());
+
+
+
+    }
 }

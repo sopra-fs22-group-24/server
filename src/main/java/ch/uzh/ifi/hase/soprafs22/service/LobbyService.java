@@ -1,11 +1,11 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 
-import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs22.entity.Player;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 
+import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.LobbyFullException;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.UserAlreadyInLobbyException;
 import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.LobbyNotExistsException;
 import ch.uzh.ifi.hase.soprafs22.repository.LobbyRepository;
@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -38,7 +39,7 @@ public class LobbyService {
         Lobby newLobby = new Lobby();
         newLobby.addUser(user);
         newLobby.setMaxSize(maxSize);
-
+        handlePlayerAlreadyInOtherLobby(user);
         Lobby createdLobby = lobbyRepository.save(newLobby);
         lobbyRepository.flush();
         return createdLobby;
@@ -46,10 +47,39 @@ public class LobbyService {
 
     public void addUserToLobby(Long lobbyId, User user) {
         Lobby lobby = lobbyRepository.findByLobbyId(lobbyId);
+        if(lobby.getMaxSize()<=lobby.getPlayers().size()+1) {
+            throw new LobbyFullException();
+        }
+        handlePlayerAlreadyInOtherLobby(user);
+        Lobby otherLobby = lobbyRepository.findByPlayersContaining(user);
+        if(otherLobby != null) {
+            otherLobby.removeUser(user);
+            UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+            lobbyRepository.saveAndFlush(otherLobby);
+            messageService.sendToLobby(otherLobby.getLobbyId(), "userLeft", userGetDTO);
+        }
         lobby.addUser(user);
 
         lobbyRepository.save(lobby);
         lobbyRepository.flush();
+    }
+
+    private void handlePlayerAlreadyInOtherLobby(User user) {
+        Lobby otherLobby = lobbyRepository.findByPlayersContaining(user);
+        if(otherLobby != null) {
+            otherLobby.removeUser(user);
+            if(otherLobby.getPlayers().isEmpty()) {
+                lobbyRepository.delete(otherLobby);
+            } else {
+                List<UserGetDTO> userGetDTOS = new ArrayList<>();
+                for(User u: otherLobby.getPlayers()) {
+                    UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(u);
+                    userGetDTOS.add(userGetDTO);
+                }
+                lobbyRepository.saveAndFlush(otherLobby);
+                messageService.sendToLobby(otherLobby.getLobbyId(), "userLeft", userGetDTOS);
+            }
+        }
     }
 
     public List<Lobby> getLobbies() {
@@ -67,6 +97,7 @@ public class LobbyService {
         if(lobby.containsUser(user)) {
             throw new UserAlreadyInLobbyException();
         }
+        handlePlayerAlreadyInOtherLobby(user);
         lobby.addUser(user);
         lobbyRepository.save(lobby);
         lobbyRepository.flush();
@@ -92,12 +123,16 @@ public class LobbyService {
         } else {
             lobbyRepository.saveAndFlush(lobby);
         }
-        UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
-        messageService.sendToLobby(lobby.getLobbyId(),"userLeft", userGetDTO);
+        List<UserGetDTO> userGetDTOS = new ArrayList<>();
+        for(User u: lobby.getPlayers()) {
+            UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(u);
+            userGetDTOS.add(userGetDTO);
+        }
+        messageService.sendToLobby(lobby.getLobbyId(),"userLeft",userGetDTOS );
     }
 
     private void changePrincipal(User user, Player player, Lobby lobby) {
-        if(user.getPrincipalName().equals(player.getUser().getPrincipalName())) {
+        if(user.getPrincipalName().equals(player.getUser().getPrincipalName())) {    
             return;
         }
         player.getUser().setPrincipalName(user.getPrincipalName());
@@ -105,7 +140,7 @@ public class LobbyService {
     }
 
     public void updateUser(User user) {
-        Lobby lobby = lobbyRepository.findByPlayers(user);
+        Lobby lobby = lobbyRepository.findByPlayersContaining(user);
         if(lobby == null) {
             return;
         }
