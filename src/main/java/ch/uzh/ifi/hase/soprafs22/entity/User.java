@@ -53,7 +53,7 @@ public class User implements Serializable, Comparable<User> {
     private String principalName;
 
 
-    @Column(name = "picture",nullable = true)
+    @Column()
     private String picture;
 
     public String getPicture() {
