@@ -70,6 +70,7 @@ public class LobbyService {
             otherLobby.removeUser(user);
             if(otherLobby.getPlayers().isEmpty()) {
                 lobbyRepository.delete(otherLobby);
+                lobbyRepository.flush();
             } else {
                 List<UserGetDTO> userGetDTOS = new ArrayList<>();
                 for(User u: otherLobby.getPlayers()) {
