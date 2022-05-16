@@ -133,7 +133,7 @@ public class LobbyService {
     }
 
     private void changePrincipal(User user, Player player, Lobby lobby) {
-        if(user.getPrincipalName().equals(player.getUser().getPrincipalName())) {    
+        if(user.getPrincipalName().equals(player.getUser().getPrincipalName())) {
             return;
         }
         player.getUser().setPrincipalName(user.getPrincipalName());
