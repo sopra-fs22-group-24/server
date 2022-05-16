@@ -147,16 +147,32 @@ public class UserService {
         log.debug("updated token for User: {}",user);
         return user;
     }
-    public  String setProfilePicture (long id, String encodedstring) {
-        User user = getUserById(id);
+    @Transactional
+    public void saveImageFile(Long id, MultipartFile file) {
 
-            user.setPicture(encodedstring);
+        try {
+            User user = getUserById(id);
 
-        userRepository.saveAndFlush(user);
-        return encodedstring;
+            byte[] byteObjects = new byte[file.getBytes().length];
+
+            int i = 0;
+
+            for (byte b : file.getBytes()){
+                byteObjects[i++] = b;
+            }
+
+            user.setPicture(byteObjects);
+
+            userRepository.save(user);
+        } catch (IOException e) {
+            //todo handle better
+            log.error("Error occurred", e);
+
+            e.printStackTrace();
+        }
     }
 
-    public String getProfilePicture(long id){
+    public byte[] getProfilePicture(long id){
         User user = getUserById(id);
         return user.getPicture();
     }

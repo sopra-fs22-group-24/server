@@ -53,14 +53,15 @@ public class User implements Serializable, Comparable<User> {
     private String principalName;
 
 
-    @Column()
-    private String picture;
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] picture;
 
-    public String getPicture() {
+    public byte[] getPicture() {
         return picture;
     }
 
-    public void setPicture(String profilpicture) {
+    public void setPicture(byte[] profilpicture) {
         this.picture = profilpicture;
     }
     public Long getId() {
