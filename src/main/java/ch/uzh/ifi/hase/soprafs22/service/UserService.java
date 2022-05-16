@@ -143,7 +143,7 @@ public class UserService {
     //refresh token for user
     public User updateToken(User user) {
         user.setToken(UUID.randomUUID().toString());
-        user = userRepository.save(user);
+        user = userRepository.saveAndFlush(user);
         log.debug("updated token for User: {}",user);
         return user;
     }
