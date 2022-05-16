@@ -177,6 +177,9 @@ public class UserService {
     }
 
     public User getUserByPrincipalName(String name) {
+        if(name==null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
         return userRepository.findByPrincipalName(name);
     }
 
