@@ -361,6 +361,8 @@ public class GameService {
     }
 
     private boolean cardCanBePlayed(DiscardPile discardPile, Card card) {
+
+
         if(card.getSymbol() == Symbol.WILDCARD ||
                 card.getSymbol() == Symbol.EXTREME_HIT) {
             return true;
@@ -370,6 +372,10 @@ public class GameService {
             return true;
         }
         if(discardPile.getTopmostCard().getSymbol() == card.getSymbol()) {
+            return true;
+        }
+        // If first card is wildcard or extreme hit then this ensures any card can be played
+        if(discardPile.getTopmostCard().getColor() == Color.NULL) {
             return true;
         }
         return false;
