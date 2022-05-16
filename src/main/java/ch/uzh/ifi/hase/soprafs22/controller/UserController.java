@@ -4,12 +4,16 @@ import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.hibernate.mapping.Any;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,23 +65,17 @@ public class UserController {
     @PostMapping("/users/{id}/picture")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-        public PictureDTO setProfilePicture(@RequestBody PictureDTO pictureDTO, @PathVariable("id") long id) {
-       String endcodedString= pictureDTO.getPicture();
-        String savedImage = userService.setProfilePicture(id,endcodedString);
-        PictureDTO pictureDTO1 = new PictureDTO();
-        pictureDTO1.setPicture(savedImage);
-        return pictureDTO1;
+        public void setProfilePicture(@RequestParam("picture") MultipartFile file, @PathVariable("id") long id) {
+
+        userService.saveImageFile(id,file);
     }
 
-    @GetMapping(value = "/users/{id}/picture")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public PictureDTO getProfilePicture(@PathVariable("id") long id) {
-                String picture = userService.getProfilePicture(id);
-                PictureDTO pictureDTO= new PictureDTO();
-                pictureDTO.setPicture(picture);
-                return pictureDTO;
-
+    @GetMapping(
+            value = "/users/{id}/picture",
+            produces = MediaType.IMAGE_JPEG_VALUE
+    )
+    public @ResponseBody byte[] getprofilepicture(@PathVariable("id") Long id) {
+        return userService.getProfilePicture(id);
     }
     @GetMapping(value = "/users/{id}")
     @ResponseStatus(HttpStatus.OK)

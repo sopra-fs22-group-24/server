@@ -39,7 +39,7 @@ public class GameController {
      */
     @MessageMapping("/game")
     public void startGame(StompHeaderAccessor accessor, LobbyPostDTO dto) {
-        if(accessor==null){
+        if(accessor.getUser()==null){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
@@ -62,7 +62,7 @@ public class GameController {
     // TODO EndPoint Complain if it works player who called uno draws automatically
     @MessageMapping("/game/{gameId}/callOut")
     public void callOut(StompHeaderAccessor accessor, UserPostDTO dto, @DestinationVariable("gameId") long gameId) {
-        if(accessor==null) {
+        if(accessor.getUser()==null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
@@ -78,7 +78,7 @@ public class GameController {
     // TODO optional PlayerArgument In playCard for extremeHitcard card
     @MessageMapping("/game/{gameId}/playCard")
     public void playCard(StompHeaderAccessor accessor, PlayCardDTO playCardDTO, @DestinationVariable("gameId") long gameId) {
-        if(accessor==null) {
+        if(accessor.getUser()==null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
@@ -99,7 +99,7 @@ public class GameController {
 
     @MessageMapping("/game/{gameId}/init")
     public void init(StompHeaderAccessor accessor, @DestinationVariable("gameId") long gameId) {
-        if(accessor==null) {
+        if(accessor.getUser()==null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
@@ -112,7 +112,7 @@ public class GameController {
 
     @MessageMapping("/game/{gameId}/drawCard")
     public void drawCard(StompHeaderAccessor accessor, @DestinationVariable("gameId") long gameId) {
-        if(accessor==null) {
+        if(accessor.getUser()==null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());

@@ -300,7 +300,7 @@ public class UserControllerTest {
         mockMvc.perform(putRequest)
                 .andExpect(status().isNoContent());
     }
-    @Test
+   /* @Test
     public void GetProfilePicture_sucess() throws Exception{
         String returnvalue = "helloworl";
         PictureDTO pictureDTO = new PictureDTO();
@@ -354,7 +354,7 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.picture", is(returnvalue)));
 
     }
-
+*/
     /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
    * can be processed
