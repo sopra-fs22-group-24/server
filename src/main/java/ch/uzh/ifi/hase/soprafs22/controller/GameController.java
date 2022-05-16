@@ -10,10 +10,12 @@ import ch.uzh.ifi.hase.soprafs22.service.MessageService;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 public class GameController {
@@ -37,6 +39,9 @@ public class GameController {
      */
     @MessageMapping("/game")
     public void startGame(StompHeaderAccessor accessor, LobbyPostDTO dto) {
+        if(accessor==null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
 
         log.info("User {} in lobby {} wants to start game", user.getUsername(), dto.getLobbyId());
@@ -57,6 +62,9 @@ public class GameController {
     // TODO EndPoint Complain if it works player who called uno draws automatically
     @MessageMapping("/game/{gameId}/callOut")
     public void callOut(StompHeaderAccessor accessor, UserPostDTO dto, @DestinationVariable("gameId") long gameId) {
+        if(accessor==null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
         User calledOutUser = userService.getUserByUsername(dto.getUsername());
         try {
@@ -70,7 +78,9 @@ public class GameController {
     // TODO optional PlayerArgument In playCard for extremeHitcard card
     @MessageMapping("/game/{gameId}/playCard")
     public void playCard(StompHeaderAccessor accessor, PlayCardDTO playCardDTO, @DestinationVariable("gameId") long gameId) {
-
+        if(accessor==null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
         Card card  = playCardDTO.getCard();
         User otherUser;
@@ -89,6 +99,9 @@ public class GameController {
 
     @MessageMapping("/game/{gameId}/init")
     public void init(StompHeaderAccessor accessor, @DestinationVariable("gameId") long gameId) {
+        if(accessor==null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
         try {
             gameService.initialize(gameId, user);
@@ -99,6 +112,9 @@ public class GameController {
 
     @MessageMapping("/game/{gameId}/drawCard")
     public void drawCard(StompHeaderAccessor accessor, @DestinationVariable("gameId") long gameId) {
+        if(accessor==null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
         User user = userService.getUserByPrincipalName(accessor.getUser().getName());
         log.info("user {} wants to draw", user.getUsername());
         try {
