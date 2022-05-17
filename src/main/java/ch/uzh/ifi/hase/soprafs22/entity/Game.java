@@ -35,6 +35,8 @@ public class Game implements Serializable  {
     @Column()
     boolean reverse=false;
 
+    @Column
+    boolean sudo=false;
     public boolean isUnoIsCalled() {
         return unoIsCalled;
     }
@@ -167,5 +169,12 @@ public class Game implements Serializable  {
         else {
             return false;
         }
+    }
+
+    public void setSudo(boolean sudo) {
+        this.sudo = sudo;
+    }
+    public boolean getSudo() {
+        return sudo;
     }
 }

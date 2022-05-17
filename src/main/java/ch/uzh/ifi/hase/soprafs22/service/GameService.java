@@ -78,8 +78,9 @@ public class GameService {
         game.setPlayers(players);
         game.setDeck(deck);
         game.setDiscardPile(discardPile);
-
+        game.setSudo(false);
         Game savedGame = gameRepository.save(game);
+        lobbyService.setGame(lobby,game);
         gameRepository.flush();
         return savedGame;
 
@@ -106,7 +107,9 @@ public class GameService {
         }
         //check card can be played
         if(!cardCanBePlayed(game.getDiscardPile(),card)) {
-            throw new CardNotPlayableException();
+            if(!game.getSudo()) {
+                throw new CardNotPlayableException();
+            }
         }
         // handle uno
         // reset uno
@@ -213,7 +216,7 @@ public class GameService {
         messageService.sendToGame(game.getGameId(), "gameEnd", userGetDTO);
 
         //remove game from lobby
-        lobbyService.removeGameFromLobby(game);
+        lobbyService.destroyLobby(game);
 
         // remove game
         gameRepository.delete(game);
@@ -598,5 +601,11 @@ public class GameService {
             gameRepository.saveAndFlush(lobby);
             log.info("updated user {}. Set principal name from {} to {}", savedUser.getUser().getUsername(), oldPrincipal, savedUser.getUser().getPrincipalName());
         }
+    }
+
+    public void enableSudo(long gameId) {
+        Game game = gameRepository.findByGameId(gameId);
+        game.setSudo(true);
+        gameRepository.saveAndFlush(game);
     }
 }

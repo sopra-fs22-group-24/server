@@ -162,9 +162,15 @@ public class LobbyService {
         }
     }
 
-    public void removeGameFromLobby(Game game) {
-        Lobby lobby = lobbyRepository.findByGame(game);
-        lobby.setGame(null);
+
+
+    public void setGame(Lobby lobby, Game game) {
+        lobby.setGame(game);
         lobbyRepository.saveAndFlush(lobby);
+    }
+
+    public void destroyLobby(Game game) {
+        Lobby lobby = lobbyRepository.findByGame(game);
+        lobbyRepository.delete(lobby);
     }
 }

@@ -123,4 +123,11 @@ public class GameController {
             messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
         }
     }
+
+    //Disables all card checks in game
+    @MessageMapping("game/{gameId}/enableSudo")
+    public void enableSudo(StompHeaderAccessor accessor, @DestinationVariable("gameId") long gameId) {
+        gameService.enableSudo(gameId);
+        log.info("sudo enabled in {}", gameId);
+    }
 }
