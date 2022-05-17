@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 
+import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs22.entity.Player;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
@@ -30,7 +31,7 @@ public class LobbyService {
     private final MessageService messageService;
 
     @Autowired
-    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, MessageService messageService) {
+    public LobbyService(LobbyRepository lobbyRepository, MessageService messageService) {
         this.lobbyRepository = lobbyRepository;
         this.messageService = messageService;
     }
@@ -159,5 +160,11 @@ public class LobbyService {
             lobbyRepository.saveAndFlush(lobby);
             log.info("updated user {}. Set principal name from {} to {}", savedUser.getUsername(), oldPrincipal, savedUser.getPrincipalName());
         }
+    }
+
+    public void removeGameFromLobby(Game game) {
+        Lobby lobby = lobbyRepository.findByGame(game);
+        lobby.setGame(null);
+        lobbyRepository.saveAndFlush(lobby);
     }
 }

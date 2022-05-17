@@ -32,12 +32,14 @@ public class GameService {
     private final MessageService messageService;
     private final LobbyService lobbyService;
     private final Random random;
+    private final UserService userService;
 
     @Autowired
-    public GameService(GameRepository gameRepository, MessageService messageService, LobbyService lobbyService, @Value("#{new java.util.Random()}") Random random) {
+    public GameService(GameRepository gameRepository, MessageService messageService, LobbyService lobbyService, UserService userService, @Value("#{new java.util.Random()}") Random random) {
         this.gameRepository = gameRepository;
         this.messageService = messageService;
         this.lobbyService = lobbyService;
+        this.userService = userService;
         this.random = random;
     }
 
@@ -149,6 +151,7 @@ public class GameService {
         //check win
         if (player.getHand().getCardCount() == 0) {
             handleWin(game, player);
+            return;
         }
         informPlayerToTurn(game);
 
@@ -173,19 +176,6 @@ public class GameService {
 
     private void handleWin(Game game, Player player) {
         /*
-        When you are out of cards, you get points for cards left in opponents’ hands as follows:
-        All cards through 9 Face Value
-        Reverse 20 Points
-        Skip 20 Points
-        Hit 2 20 Points
-        Discard All 30 Points
-        Wild 50 Points
-        Extreme Hit 50 Points
-        The WINNER is the first player to reach 500 points. However, the game may be scored by
-        keeping a running total of the points each player is caught with at the end of each hand.
-        When one player reaches 500 points, the player with the lowest points is the winner.
-         */
-        //calculate score
         int score = 0;
         for(Player p : game.getPlayers()) {
             for(Card card : p.getHand().getCards()) {
@@ -207,6 +197,28 @@ public class GameService {
         }
 
         messageService.sendToGame(game.getGameId(), "score", scoreDTOS);
+        */
+
+        //increase games played for each user
+        for (Player p : game.getPlayers()) {
+            User user = p.getUser();
+            userService.increaseGamesPlayed(user);
+        }
+
+        //increase games won for winner
+        userService.increaseGamesWon(player.getUser());
+
+        //inform players who won
+        UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(player.getUser());
+        messageService.sendToGame(game.getGameId(), "gameEnd", userGetDTO);
+
+        //remove game from lobby
+        lobbyService.removeGameFromLobby(game);
+
+        // remove game
+        gameRepository.delete(game);
+
+
     }
 
     private void informPlayerOnHand(Player player, Game game) {

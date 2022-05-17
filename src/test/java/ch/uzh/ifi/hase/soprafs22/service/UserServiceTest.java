@@ -72,4 +72,18 @@ public class UserServiceTest {
     assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser));
   }
 
+  @Test
+    public void increaseGamesPlayed_success() {
+      testUser.setGamesPlayed(0);
+      userService.increaseGamesPlayed(testUser);
+      assertEquals(1,testUser.getGamesPlayed(), 1);
+  }
+
+    @Test
+    public void increaseGamesWon_success() {
+        testUser.setGamesWon(0);
+        userService.increaseGamesWon(testUser);
+        assertEquals(1,testUser.getGamesWon());
+    }
+
 }

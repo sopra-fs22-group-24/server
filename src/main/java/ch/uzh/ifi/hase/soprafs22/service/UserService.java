@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs22.entity.Player;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs22.utils.StompHeaderUtil;
@@ -207,4 +208,18 @@ public class UserService {
     }
 
     public User getUserByUsername(String username) {return userRepository.findByUsername(username);}
+
+    public void increaseGamesPlayed(User user) {
+        //increase games played for each user
+        int gamesPlayed = user.getGamesPlayed();
+        user.setGamesPlayed(gamesPlayed+1);
+        userRepository.saveAndFlush(user);
+
+    }
+
+    public void increaseGamesWon(User user) {
+        int gamesWon = user.getGamesWon();
+        user.setGamesWon(gamesWon+1);
+        userRepository.saveAndFlush(user);
+    }
 }

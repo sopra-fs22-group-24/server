@@ -157,4 +157,15 @@ public class Game implements Serializable  {
 
         return players.get(turnIndexCopy);
     }
+
+    public boolean equals(Object o) {
+
+        Game otherGame = (Game) o;
+        if (this.getGameId().equals(otherGame.getGameId())) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 }
