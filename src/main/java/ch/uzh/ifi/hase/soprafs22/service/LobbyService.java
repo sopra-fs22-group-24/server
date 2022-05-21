@@ -45,10 +45,10 @@ public class LobbyService {
         lobbyRepository.flush();
         return createdLobby;
     }
-
+/*
     public void addUserToLobby(Long lobbyId, User user) {
         Lobby lobby = lobbyRepository.findByLobbyId(lobbyId);
-        if(lobby.getMaxSize()<=lobby.getPlayers().size()+1) {
+        if(lobby.getMaxSize()<lobby.getPlayers().size()+1) {
             throw new LobbyFullException();
         }
         handlePlayerAlreadyInOtherLobby(user);
@@ -64,6 +64,8 @@ public class LobbyService {
         lobbyRepository.save(lobby);
         lobbyRepository.flush();
     }
+
+ */
 
     private void handlePlayerAlreadyInOtherLobby(User user) {
         Lobby otherLobby = lobbyRepository.findByPlayersContaining(user);
@@ -99,6 +101,9 @@ public class LobbyService {
         if(lobby.containsUser(user)) {
             throw new UserAlreadyInLobbyException();
         }
+        if(lobby.getMaxSize()<lobby.getPlayers().size()+1) {
+            throw new LobbyFullException();
+        }
         handlePlayerAlreadyInOtherLobby(user);
         lobby.addUser(user);
         lobbyRepository.save(lobby);
@@ -132,7 +137,7 @@ public class LobbyService {
         }
         messageService.sendToLobby(lobby.getLobbyId(),"userLeft",userGetDTOS );
     }
-
+/*
     private void changePrincipal(User user, Player player, Lobby lobby) {
         if(user.getPrincipalName().equals(player.getUser().getPrincipalName())) {
             return;
@@ -162,7 +167,7 @@ public class LobbyService {
         }
     }
 
-
+*/
 
     public void setGame(Lobby lobby, Game game) {
         lobby.setGame(game);
