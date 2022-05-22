@@ -53,7 +53,7 @@ public class GameController {
             log.info("Successfully created game {} for lobby {} by user {}", game.getGameId(), lobbyId, user.getUsername());
         } catch (GameException e) {
             log.info("Error in /game: {} ",e.getClass().getSimpleName());
-            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+            messageService.sendErrorToUser(user.getPrincipalName(), e);
         }
 
 
@@ -70,7 +70,7 @@ public class GameController {
         try {
             gameService.callOutPlayer(gameId, user, calledOutUser );
         } catch (GameException e) {
-            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+            messageService.sendErrorToUser(user.getPrincipalName(), e);
         }
     }
 
@@ -93,7 +93,7 @@ public class GameController {
         try {
             gameService.playCard(gameId, user, card, otherUser, uno);
         } catch (GameException e) {
-            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+            messageService.sendErrorToUser(user.getPrincipalName(), e);
         }
     }
 
@@ -106,7 +106,7 @@ public class GameController {
         try {
             gameService.initialize(gameId, user);
         } catch (GameException e) {
-            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+            messageService.sendErrorToUser(user.getPrincipalName(), e);
         }
     }
 
@@ -120,7 +120,7 @@ public class GameController {
         try {
             gameService.drawCard(gameId, user);
         } catch (GameException e) {
-            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+            messageService.sendErrorToUser(user.getPrincipalName(), e);
         }
     }
 

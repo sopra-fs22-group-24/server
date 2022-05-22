@@ -74,7 +74,7 @@ public class LobbyController {
         try {
             lobby = lobbyService.joinLobby(user, lobbyId);
         } catch (GameException e) {
-            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+            messageService.sendErrorToUser(user.getPrincipalName(), e);
             return;
         }
         LobbyPostDTO returnDto = DTOMapper.INSTANCE.convertEntityToLobbyPostDTO(lobby);
@@ -113,7 +113,7 @@ public class LobbyController {
         try {
             lobbyService.leaveLobby(lobbyId, user);
         } catch (GameException e) {
-            messageService.sendErrorToUser(user.getPrincipalName(), e.getClass().getSimpleName());
+            messageService.sendErrorToUser(user.getPrincipalName(), e);
         }
 
     }

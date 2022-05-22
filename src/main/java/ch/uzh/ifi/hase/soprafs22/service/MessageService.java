@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 
+import ch.uzh.ifi.hase.soprafs22.exceptions.gameExceptions.GameException;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.ErrorDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,10 @@ public class MessageService {
         simpMessage.convertAndSend("/lobby/"+lobbyId+"/"+destination, payload);
     }
 
-    public void sendErrorToUser(String principal, String error) {
+    public void sendErrorToUser(String principal, GameException error) {
         ErrorDTO err = new ErrorDTO();
-        err.setError(error);
+        err.setError(error.getClass().getSimpleName());
+        err.setMsg(error.getMessage());
         simpMessage.convertAndSendToUser(principal, "/queue/error", err);
     }
 
