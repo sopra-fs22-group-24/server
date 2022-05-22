@@ -779,7 +779,8 @@ public class GameServiceTest {
         Card card = new Card(Color.BLUE, Symbol.REVERSE);
         Hand hand = new Hand();
         hand.addCard(card);
-
+        hand.addCard(card);
+        hand.addCard(card);
 
         Hand hand2 = new Hand();
         Hand hand3 = new Hand();

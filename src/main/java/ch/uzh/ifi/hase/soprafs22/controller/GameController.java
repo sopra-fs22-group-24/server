@@ -76,6 +76,20 @@ public class GameController {
 
     // TODO additionaly take optional UNO called argument ( then it will be possible to complain until next move is over)
     // TODO optional PlayerArgument In playCard for extremeHitcard card
+
+    /*
+    Will only be used if player forgot to say uno while playing a card.
+     */
+    @MessageMapping("/game/{gameId}/uno")
+    public void sayUno(StompHeaderAccessor accessor, @DestinationVariable("gameId") long gameId) {
+        if(accessor.getUser()==null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        User user = userService.getUserByPrincipalName(accessor.getUser().getName());
+
+        gameService.sayUnoAfterPlaying(gameId, user);
+    }
+
     @MessageMapping("/game/{gameId}/playCard")
     public void playCard(StompHeaderAccessor accessor, PlayCardDTO playCardDTO, @DestinationVariable("gameId") long gameId) {
         if(accessor.getUser()==null) {

@@ -253,9 +253,11 @@ public class GameService {
         // find next player
         Player victim = game.getNextPlayer();
         // Let them draw twice
+        int cardsBefore = victim.getHand().getCardCount();
         List<CardDTO> cardDTOS1 = playerDrawsCard(game, victim);
         List<CardDTO> cardDTOS2 = playerDrawsCard(game, victim);
         cardDTOS1.addAll(cardDTOS2);
+        int cardsDrawn = victim.getHand().getCardCount()-cardsBefore;
         //remove card from player hand
         player.getHand().removeCard(card);
         //set card on Top
@@ -267,6 +269,9 @@ public class GameService {
             cardDTOS.add(DTOMapper.INSTANCE.convertCardToCardDTO(playerCard));
         }
         messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS);
+        MessageDTO messageDTO = new MessageDTO();
+        messageDTO.setMsg(String.format("%s fell victim to a Hit 2 and had to draw %d cards", victim.getUser().getUsername(), cardsDrawn));
+        messageService.sendToGame(game.getGameId(), "messages", messageDTO);
         game.nextTurn();
         game.nextTurn();
     }
@@ -277,6 +282,9 @@ public class GameService {
         game.getDiscardPile().discardCard(card);
         // skip next players turn
         game.nextTurn();
+        MessageDTO messageDTO = new MessageDTO();
+        messageDTO.setMsg(String.format("%s was skipped", game.getPlayerTurn().getUser().getUsername()));
+        messageService.sendToGame(game.getGameId(), "messages", messageDTO);
         game.nextTurn();
     }
 
@@ -344,14 +352,18 @@ public class GameService {
         //set card on Top
         game.getDiscardPile().discardCard(card);
         //choosen Player draws
-
+        int cardsBefore = victim.getHand().getCardCount();
         playerDrawsCard(game, victim);
+        int cardsDrawn = victim.getHand().getCardCount() - cardsBefore;
         List<CardDTO> cardDTOS = new ArrayList<>();
         for(Card playerCard: victim.getHand().getCards()) {
             cardDTOS.add(DTOMapper.INSTANCE.convertCardToCardDTO(playerCard));
         }
+        //send drawn cards to player
         messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS);
-        //send drawed cards to player
+        MessageDTO messageDTO = new MessageDTO();
+        messageDTO.setMsg(String.format("%s fell victim to an Extreme Hit from %s and has drawn %d cards",victim.getUser().getUsername(), player.getUser().getUsername(), cardsDrawn));
+        messageService.sendToGame(game.getGameId(), "messages", messageDTO);
         //messageService.sendToUser(victim.getUser().getPrincipalName(),game.getGameId()+"/cardsDrawn", cardDTOS);
 
         game.nextTurn();
@@ -432,7 +444,7 @@ public class GameService {
         return player.getHand().containsCard(card);
     }
     private boolean checkUnoCanBeCalled(Player player){
-        return player.getHand().getCardCount()==2;
+        return player.getHand().getCardCount()<=2;
     }
     // TODO remember if uno was called by the last player whos turn it was
 
@@ -493,7 +505,9 @@ public class GameService {
         }
 
         Player lastPlayer = game.getLastPlayer();
+        int cardsBefore = player.getHand().getCardCount();
         playerDrawsCard(game, player);
+        int cardsDrawn = player.getHand().getCardCount()-cardsBefore;
 
         List<CardDTO> cardsDtos = new ArrayList<>();
         for(Card playerCard: player.getHand().getCards()) {
@@ -514,6 +528,10 @@ public class GameService {
         gameRepository.saveAndFlush(game);
         Player playerTurn = game.getPlayerTurn();
         messageService.sendToGame(gameId, "playerTurn", DTOMapper.INSTANCE.convertEntityToUserGetDTO(playerTurn.getUser()));
+
+        MessageDTO messageDTO = new MessageDTO();
+        messageDTO.setMsg(String.format("%s pressed the launcher button and has drawn %d cards", player.getUser().getUsername(), cardsDrawn));
+        messageService.sendToGame(gameId, "messages", messageDTO);
 
     }
 
@@ -620,5 +638,18 @@ public class GameService {
         Game game = gameRepository.findByGameId(gameId);
         game.setSudo(true);
         gameRepository.saveAndFlush(game);
+    }
+
+    public void sayUnoAfterPlaying(long gameId, User user) {
+        Game game = gameRepository.findByGameId(gameId);
+        Player player = authenticateUser(user, game);
+        if(checkUnoCanBeCalled(player)) {
+            player.setHasSaidUno(true);
+            gameRepository.saveAndFlush(game);
+            MessageDTO messageDTO = new MessageDTO();
+            messageDTO.setMsg(String.format("%s said uno", player.getUser().getUsername()));
+            messageService.sendToGame(gameId, "messages", messageDTO);
+        }
+
     }
 }
