@@ -612,7 +612,7 @@ public class GameServiceTest {
 
         gameService.playCard(gameId, u, card, null, false);
         assertEquals(1, p.getHand().getCardCount());
-
+        assertEquals(game.getDiscardPile().getTopmostCard().getSymbol(),Symbol.DISCARD_ALL);
     }
 
     @Test

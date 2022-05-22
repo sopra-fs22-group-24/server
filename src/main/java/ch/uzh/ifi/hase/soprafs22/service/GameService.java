@@ -51,7 +51,9 @@ public class GameService {
 
         // get lobby
         Lobby lobby = lobbyService.findByLobbyId(lobbyId);
-
+        if(lobby.getGame() != null) {
+            return lobby.getGame();
+        }
         // check if user is creator/admin of lobby
         if(!lobby.userIsAdmin(user)) {
             throw new UserNotLobbyAdminException();
@@ -303,17 +305,24 @@ public class GameService {
         if (cardsLeftInHand > 0) {
             for (Card cardToCheck : player.getHand().getCards()) {
                 if (card.getColor() == cardToCheck.getColor()) {
-                    toDiscard.add(cardToCheck);
+                    if(cardToCheck.getSymbol() != Symbol.DISCARD_ALL) {
+                        toDiscard.add(cardToCheck);
+                    }
                 }
             }
         }
+        /*
         else {
             toDiscard.add(card);
-        }
+        }*/
         for(Card cardToDiscard: toDiscard) {
             player.getHand().removeCard(cardToDiscard);
             game.getDiscardPile().discardCard(cardToDiscard);
         }
+        // discard DiscardAll card at the end
+        player.getHand().removeCard(card);
+        game.getDiscardPile().discardCard(card);
+
         game.nextTurn();
     }
 
@@ -321,17 +330,21 @@ public class GameService {
         if(card.getColor()==null){
             throw new CardColorNotChoosenException();
         }
-        //remove card from hand
-        player.getHand().removeCard(card);
-        //set card on Top
-        game.getDiscardPile().discardCard(card);
-        //choosen Player draws
         Player victim;
         try {
             victim = game.getPlayerFromUser(otherUser);
         } catch(NullPointerException e) {
             throw new PlayerNotInGameException();
         }
+        if(player.getUser().getId().equals(victim.getUser().getId())) {
+            throw new CantTargetYourselfException();
+        }
+        //remove card from hand
+        player.getHand().removeCard(card);
+        //set card on Top
+        game.getDiscardPile().discardCard(card);
+        //choosen Player draws
+
         playerDrawsCard(game, victim);
         List<CardDTO> cardDTOS = new ArrayList<>();
         for(Card playerCard: victim.getHand().getCards()) {
