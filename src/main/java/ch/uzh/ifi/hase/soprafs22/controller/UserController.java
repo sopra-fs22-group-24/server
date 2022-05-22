@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.hibernate.mapping.Any;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -71,11 +73,13 @@ public class UserController {
     }
 
     @GetMapping(
-            value = "/users/{id}/picture",
-            produces = MediaType.IMAGE_JPEG_VALUE
+            value = "/users/{id}/picture"
     )
-    public @ResponseBody byte[] getprofilepicture(@PathVariable("id") Long id) {
-        return userService.getProfilePicture(id);
+    public @ResponseBody String getprofilepicture(@PathVariable("id") Long id) {
+
+      byte[] picture =  userService.getProfilePicture(id);
+        String encodedString = Base64.getEncoder().encodeToString(picture);
+      return encodedString;
     }
     @GetMapping(value = "/users/{id}")
     @ResponseStatus(HttpStatus.OK)
