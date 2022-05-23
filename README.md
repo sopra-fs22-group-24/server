@@ -10,13 +10,22 @@ The game we choose is the popular game Uno Extreeme.
 - gradle
 - java 15
 - spring boot
+- Heroku
+- Sonarcloud
 ## High Level Components
 Game Conctroller
 
 ## High Level Components
+Components:
 - game 
 - user
 - lobby 
+For each of the components there is a Repository, an entity, a Controller and a Service
+- Repository: to store Entities, e.g. Userrepository
+- Entities: Java classes representing database Tables
+- Conroller: handle client requests and call services
+- Service: Handling all the functionality (e.g. retrieve users, save data, change data, logic)
+
 
 ## Launch and Deployement
 For your local development environment, you will need Node.js. You can download it [here](https://nodejs.org). All other dependencies, including React, get installed with:
@@ -45,7 +54,6 @@ It correctly bundles React in production mode and optimizes the build for the be
 
 
 ## Roadmap
-
 ### Feature 1
 ### Feature 2
 ### Feature 3
