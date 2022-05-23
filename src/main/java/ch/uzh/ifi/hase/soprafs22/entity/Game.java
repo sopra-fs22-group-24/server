@@ -23,7 +23,7 @@ public class Game implements Serializable  {
     @Column(nullable = false, length = 4096)
     private DiscardPile discardPile;
 
-    @Column(nullable = false, length = 32768)
+    @Column(nullable = false, length = 1048576)
     Vector<Player> players;
 
     @Column()
