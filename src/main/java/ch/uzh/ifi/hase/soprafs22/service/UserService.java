@@ -171,6 +171,8 @@ public class UserService {
 
     public byte[] getProfilePicture(long id){
         User user = getUserById(id);
+        if(user.getPicture()==null)
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
         return user.getPicture();
     }
 

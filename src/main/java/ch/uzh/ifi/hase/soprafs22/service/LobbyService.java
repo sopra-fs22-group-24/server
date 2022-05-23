@@ -177,5 +177,6 @@ public class LobbyService {
     public void destroyLobby(Game game) {
         Lobby lobby = lobbyRepository.findByGame(game);
         lobbyRepository.delete(lobby);
+        lobbyRepository.flush();
     }
 }

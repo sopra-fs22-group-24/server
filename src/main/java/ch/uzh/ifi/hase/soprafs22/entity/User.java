@@ -128,6 +128,6 @@ public class User implements Serializable, Comparable<User> {
 
     @Override
     public int compareTo(User o) {
-        return score - o.getScore();
+        return gamesWon - o.getGamesWon();
     }
 }
