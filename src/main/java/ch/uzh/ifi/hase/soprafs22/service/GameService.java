@@ -524,11 +524,13 @@ public class GameService {
             cardsDtos.add(DTOMapper.INSTANCE.convertCardToCardDTO(playerCard));
         }
         // inform players of the card count of the drawing player
+        /*
         NCardsDTO nCardsDTO = new NCardsDTO();
         nCardsDTO.setUsername(user.getUsername());
         nCardsDTO.setnCards(player.getHand().getCardCount());
         messageService.sendToGame(gameId, "playerHasNCards", nCardsDTO);
-
+        */
+        informPlayers_nrOfCardsInHandPlayers(game);
         // inform player of the new cards they got
         messageService.sendToUser(player.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardsDtos);
 
