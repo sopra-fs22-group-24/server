@@ -273,7 +273,6 @@ public class GameService {
         messageDTO.setMsg(String.format("%s fell victim to a Hit 2 and had to draw %d cards", victim.getUser().getUsername(), cardsDrawn));
         messageService.sendToGame(game.getGameId(), "messages", messageDTO);
         game.nextTurn();
-        game.nextTurn();
     }
 
     private void handleSkip(Game game, Player player, Card card) {
@@ -330,6 +329,17 @@ public class GameService {
         // discard DiscardAll card at the end
         player.getHand().removeCard(card);
         game.getDiscardPile().discardCard(card);
+        // check if there is a second discardAll of the same color and discard it
+        boolean foundAnother = false;
+        for (Card cardToDiscard: player.getHand().getCards()) {
+            if (cardToDiscard.getSymbol() == Symbol.DISCARD_ALL && cardToDiscard.getColor() == card.getColor()) {
+                card = cardToDiscard;
+            }
+        }
+        if(foundAnother) {
+            player.getHand().removeCard(card);
+            game.getDiscardPile().discardCard(card);
+        }
 
         game.nextTurn();
     }
@@ -599,9 +609,13 @@ public class GameService {
             throw new InvalidCallOutException();
         }
         //called out player has to draw twice
-        List<CardDTO> cardDTO = playerDrawsCard(game, calledOutPlayer);
-        cardDTO.addAll(playerDrawsCard(game, calledOutPlayer));
+        playerDrawsCard(game, calledOutPlayer);
+        playerDrawsCard(game, calledOutPlayer);
 
+        List<CardDTO> cardDTOS = new ArrayList<>();
+        for (Card card: calledOutPlayer.getHand().getCards()) {
+            cardDTOS.add(DTOMapper.INSTANCE.convertCardToCardDTO(card));
+        }
         gameRepository.saveAndFlush(game);
         informPlayers_nrOfCardsInHandPlayers(game);
 
@@ -609,7 +623,7 @@ public class GameService {
         calledOutDTO.setCallee(player.getUser().getUsername());
         calledOutDTO.setCalledOutPlayer(calledOutPlayer.getUser().getUsername());
         messageService.sendToGame(gameId,"calledOut", calledOutDTO);
-        messageService.sendToUser(calledOutPlayer.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTO);
+        messageService.sendToUser(calledOutPlayer.getUser().getPrincipalName(),gameId+"/cardsDrawn", cardDTOS);
 
     }
 
