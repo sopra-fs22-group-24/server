@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -30,6 +33,7 @@ public class UserService {
   private final Logger log = LoggerFactory.getLogger(UserService.class);
 
   private final UserRepository userRepository;
+  private final ImageService imageService = new ImageService();
 
   @Autowired
   public UserService(@Qualifier("userRepository") UserRepository userRepository) {
@@ -171,8 +175,18 @@ public class UserService {
 
     public byte[] getProfilePicture(long id){
         User user = getUserById(id);
-        if(user.getPicture()==null)
-            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+        if(user.getPicture()==null) {
+            BufferedImage image = imageService.JavaImageIOTest();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            try {
+                ImageIO.write(image, "jpg", bos );
+                byte [] data = bos.toByteArray();
+                user.setPicture(data);
+            }
+            catch (IOException ex){};
+
+
+        }
         return user.getPicture();
     }
 
