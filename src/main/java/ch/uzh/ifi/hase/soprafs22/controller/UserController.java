@@ -81,6 +81,16 @@ public class UserController {
         String encodedString = Base64.getEncoder().encodeToString(picture);
       return encodedString;
     }
+    @GetMapping(
+            value = "/users/picture/{username}"
+    )
+    public @ResponseBody String getprofilepicture(@PathVariable("username") String username) {
+
+        byte[] picture =  userService.getProfilePicture(username);
+        String encodedString = Base64.getEncoder().encodeToString(picture);
+        return encodedString;
+    }
+
     @GetMapping(value = "/users/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody

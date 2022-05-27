@@ -189,7 +189,25 @@ public class UserService {
         }
         return user.getPicture();
     }
+    public byte[] getProfilePicture(String username){
+        User user = userRepository.findByUsername(username);
+        if(user==null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        if(user.getPicture()==null) {
+            BufferedImage image = imageService.JavaImageIOTest();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            try {
+                ImageIO.write(image, "jpg", bos );
+                byte [] data = bos.toByteArray();
+                user.setPicture(data);
+            }
+            catch (IOException ex){};
 
+
+        }
+        return user.getPicture();
+    }
 /*
     public User authenticateUser(StompHeaderAccessor accessor) {
         String token = StompHeaderUtil.getNativeHeaderField(accessor, "token");
