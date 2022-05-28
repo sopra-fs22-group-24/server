@@ -12,51 +12,62 @@ The game we choose is the popular game Uno Extreme.
 - spring boot
 - Heroku (for automatic deployment via github)
 - Sonarcloud (for Coverage and bug detection)
-## High Level Components
-Game Conctroller
+
 
 ## High Level Components
-Components:
-- game 
-- user
-- lobby 
-- (cards)
-- (deck)
-For each of the components there is a Repository, an entity, a Controller and a Service
-- Repository: to store Entities, e.g. Userrepository
-- Entities: Java classes representing database Tables
-- Conroller: handle client requests and call services
-- Service: Handling all the functionality (e.g. retrieve users, save data, change data, logic)
+### Game
+- GameController handles all requests via websockets and calls the GameService with the data.
+- GameService validates and processes the data and stores the changes in the game repository.
+- JpaEntity Game & GameRepository stores the game data such as players their hands the deck and the discard pile.
+
+### User
+- UserController via Rest protocol
+- UserService Handles the User data from the controller
+### Lobby 
+- LobbyController Rest and Websocket Endpoints
+- LobbyService Handles the Lobby data from the controller
+
+
 
 
 ## Launch and Deployement
-For your local development environment, you will need Node.js. You can download it [here](https://nodejs.org). All other dependencies, including React, get installed with:
+### Setup this Template with your IDE of choice
+Building with Gradle
+You can use the local Gradle Wrapper to build the application.
 
-```npm install```
+- macOS: ./gradlew
+- Linux: ./gradlew
+- Windows: ./gradlew.bat
+More Information about Gradle Wrapper and Gradle.
 
-Run this command before you start your application for the first time. Next, you can start the app with:
+#### Build
+./gradlew build
+#### Run
+./gradlew bootRun
+#### Test
+./gradlew test
+#### Development Mode
+You can start the backend in development mode, this will automatically trigger a new build and reload the application once the content of a file has been changed and you save the file.
 
-```npm run dev```
+Start two terminal windows and run:
 
-Now you can open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- ./gradlew build --continuous
 
-Notice that the page will reload if you make any edits. You will also see any lint errors in the console (use Google Chrome).
+and in the other one:
 
-### Testing
-Testing is optional, and you can run the tests with `npm run test`.
-This launches the test runner in an interactive watch mode. See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- ./gradlew bootRun
 
-> For macOS user running into a 'fsevents' error: https://github.com/jest-community/vscode-jest/issues/423
+If you want to avoid running all tests with every change, use the following command instead:
 
-### Build
-Finally, `npm run build` builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance: the build is minified, and the filenames include hashes.<br>
+- ./gradlew build --continuous -xtest
 
 
 
 ## Roadmap
-### Sorting Cards according to Color before returning them
-### Feature Profile Picture displayed in lobbies
+- Sorting Cards according to Color before returning them
+- Profile Picture displayed in lobbies
+- Additonal Cards like Change Hands
+
 
 
 
