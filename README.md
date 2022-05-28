@@ -1,4 +1,4 @@
-# SoPra Project Group 22 Uno Extreme Server
+# SoPra Project Group 24 Uno Extreme Server
 
 ## Introduction
 We are a Team of 4 Students at the UZH of Zürich.
