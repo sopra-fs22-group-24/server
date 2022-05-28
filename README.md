@@ -4,14 +4,14 @@
 We are a Team of 4 Students at the UZH of Zürich.
 For the course Software Enginnering Lab we had to build a web app.
 We wanted to make a fun project and therefore we decided to implement a game.
-The game we choose is the popular game Uno Extreeme.
+The game we choose is the popular game Uno Extreme.
 
 ## Technologies
-- gradle
-- java 15
+- gradle (build tool)
+- java 15 
 - spring boot
-- Heroku
-- Sonarcloud
+- Heroku (for automatic deployment via github)
+- Sonarcloud (for Coverage and bug detection)
 ## High Level Components
 Game Conctroller
 
@@ -20,6 +20,8 @@ Components:
 - game 
 - user
 - lobby 
+- (cards)
+- (deck)
 For each of the components there is a Repository, an entity, a Controller and a Service
 - Repository: to store Entities, e.g. Userrepository
 - Entities: Java classes representing database Tables
@@ -50,13 +52,11 @@ This launches the test runner in an interactive watch mode. See the section abou
 Finally, `npm run build` builds the app for production to the `build` folder.<br>
 It correctly bundles React in production mode and optimizes the build for the best performance: the build is minified, and the filenames include hashes.<br>
 
-### developers who want to contribute?? explain
 
 
 ## Roadmap
-### Feature 1
-### Feature 2
-### Feature 3
+### Sorting Cards according to Color before returning them
+### Feature Profile Picture displayed in lobbies
 
 
 
