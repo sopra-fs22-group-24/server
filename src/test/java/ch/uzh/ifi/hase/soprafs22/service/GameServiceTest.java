@@ -1272,6 +1272,55 @@ public class GameServiceTest {
     }
 
     @Test
+    public void sayUnoAfterPlaying_whenSuccess_thenCallOutImpossible() {
+        long gameId = 128l;
+
+        DiscardPile d = new DiscardPile();
+        d.discardCard(new Card(Color.BLUE, Symbol.FOUR));
+        Deck deck = new Deck();
+        Card card = new Card(Color.BLUE, Symbol.EIGHT);
+        Hand hand = new Hand();
+        hand.addCard(card);
+
+
+        Hand hand2 = new Hand();
+        hand2.addCard(card);
+        Hand hand3 = new Hand();
+        User u = new User();
+        u.setId(1l);
+        u.setPrincipalName("x");
+
+        User u2 = new User();
+        u2.setId(2l);
+        u2.setPrincipalName("x");
+        User u3 = new User();
+        u3.setId(3l);
+
+        Player p = new Player();
+        p.setUser(u);
+        p.setHand(hand);
+
+        Player p2 = new Player();
+        p2.setUser(u2);
+        p2.setHand(hand2);
+
+        Vector<Player> players = new Vector<>();
+        players.add(p);
+        players.add(p2);
+
+        Game game = new Game();
+        game.setGameId(gameId);
+        game.setPlayers(players);
+        game.setDiscardPile(d);
+        game.setDeck(deck);
+        Mockito.when(gameRepository.findByGameId(gameId)).thenReturn(game);
+        gameService.sayUnoAfterPlaying(gameId, u);
+        assertTrue(p.isHasSaidUno());
+
+        assertThrows(InvalidCallOutException.class, () -> gameService.callOutPlayer(gameId, u2, u));
+
+    }
+    @Test
     public void drawCard_sucess() {
     }
 
